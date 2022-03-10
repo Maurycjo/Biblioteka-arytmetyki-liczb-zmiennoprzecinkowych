@@ -1,0 +1,1 @@
+Arytmetyka komputerów, projekt
