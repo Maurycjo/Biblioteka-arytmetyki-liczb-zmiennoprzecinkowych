@@ -8,12 +8,12 @@ private:
 	bool* grs;
 	int size;
 
-	bool* dec2binary(int number); //return binary
-	bool* binary2float(bool* binary);//return float
+	
 
 public:
 	FloatNumber(Standart s);
-	void dec2float(int number);
+	~FloatNumber();
+	void dec2float(float inputNumber);
 
 	
 };
