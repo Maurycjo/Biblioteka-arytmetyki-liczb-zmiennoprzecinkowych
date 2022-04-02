@@ -1,7 +1,7 @@
 #include "FloatNumber.h"
 #include <iostream>
 #include <math.h>
-#include <vector>
+
 
 using namespace std;
 
@@ -53,7 +53,7 @@ void FloatNumber::dec2float(float inputNumber)
 	bool bitR,bitS;								//bity R i S do zaokraglania
 	int decPlace = 0;							//aktualne miejsce przecinka 
 
-	
+	fracTab[0] = 0;
 
 
 	//ustalenie njawiekszej potegi dwojki mniejszej od czesci calkowitej liczby
@@ -67,6 +67,7 @@ void FloatNumber::dec2float(float inputNumber)
 
 
 
+	
 	//zamiana czesci calkowitej na liczbe wynikowa
 	while (twoPow>0)
 	{
@@ -99,27 +100,35 @@ void FloatNumber::dec2float(float inputNumber)
 					bitS = 0;
 			}
 			currentPower++;
+			
 		}
 		else
 		{
 			fracTab[fracIterator] = currentBit;
 		}
-		if (fracIterator == s.getFraction())
+		if (fracIterator== s.getFraction())
 		{
 			decPlace = fracIterator;
 		}
 			fracIterator++;
+
 	}
 	
-	
-	
+	if (fracTab[0] == 0)
+		currentPower--;
 
-	
+	cout <<"tab0: "<<fracTab[0] << endl;
+
+	cout << "pow: ";
+	cout << currentPower << endl;
+
 	while (fracIterator <= (s.getFraction() + 2))
 	{
 		
+		
+
 		frac *= 2;
-		if (frac > 1)
+		if (frac >= 1)
 		{
 			frac -= 1;
 			currentBit = 1;
@@ -129,7 +138,7 @@ void FloatNumber::dec2float(float inputNumber)
 			currentBit = 0;
 		}
 
-
+		
 		if (fracIterator == (s.getFraction()) + 1)
 			bitR = currentBit;
 		if (fracIterator == (s.getFraction()) + 2)
@@ -147,17 +156,25 @@ void FloatNumber::dec2float(float inputNumber)
 
 		fracTab[fracIterator] = currentBit;
 		fracIterator++;
+
+		if (fracTab[0] == 0)
+		{
+			fracIterator--;
+			currentPower--;
+		}
+
 	}
 
 	for (int i = 0; i <= s.getFraction(); i++)
 	{
-		cout << fracTab[i] << " ";
+		std::cout << fracTab[i] << " ";
 	}
-	cout << "RS" << bitR << bitS;
+	std::cout << "RS" << bitR << bitS;
 
 
 	currentPower += decPlace;
-	cout << "\npotega: "<<currentPower;
+	std::cout << "\npotega: "<<currentPower;
+	std::cout << "\ndecplace" << decPlace << endl;
 
 
 
