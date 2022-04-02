@@ -8,11 +8,8 @@ int main()
 {
 	Standart s(3, 4);
 	FloatNumber num(s);
+	num.dec2float(420);
 
-	int testNumber = 420;
-	cout << testNumber << endl;
-
-	num.dec2float(testNumber);
 
 	
 
