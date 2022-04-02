@@ -34,7 +34,7 @@ void FloatNumber::dec2float(float inputNumber)
 
 	bool* fracTab = new bool[s.getFraction()+1];
 	bool* expTab = new bool[s.getExponent()];
-
+	fracTab[0] = 0;
 
 	int number = inputNumber;						//czesc calkowita liczby
 	float frac = inputNumber - float(number);		//czesc ulamkowa liczby
@@ -42,20 +42,20 @@ void FloatNumber::dec2float(float inputNumber)
 	
 	
 
-	int minRange = 1 - pow(2, s.getExponent()) - 1;	//najmniejszy mozliwy wykladnik	
-	int maxRange = pow(2, s.getExponent()) - 1;		//najwiekszy mozliwy wykladnik
-	int mask = pow(2, s.getExponent()) - 1 -		//maska wykladnika
-	pow(2, (s.getExponent() - 1));
+		//najwiekszy mozliwy wykladnik
+	int mask = pow(2, s.getExponent()) - 1 -pow(2, (s.getExponent() - 1));
+	int minRange = 1 - mask;
+	int maxRange = pow(2, s.getExponent())-2- mask;
 	int currentPower = 0;							//aktualny wykladnik
 	int twoPow = 1;									//do odejmowania przy konwersji
 	bool currentBit;								//aktualny bit w konwersji
 	int fracIterator = 0;							//iterator po tablicy wykladnikow
-	bool bitR,bitS;								//bity R i S do zaokraglania
-	int decPlace = 0;							//aktualne miejsce przecinka 
+	bool bitR,bitS;									//bity R i S do zaokraglania
+	int decPlace = 0;								//aktualne miejsce przecinka 
+	bool denormalized = false;						//okreslenie czy trzeba denormalizowac liczbe
 
-	fracTab[0] = 0;
-
-
+	
+	
 	//ustalenie njawiekszej potegi dwojki mniejszej od czesci calkowitej liczby
 	while (twoPow <= number)
 	{
@@ -117,10 +117,6 @@ void FloatNumber::dec2float(float inputNumber)
 	if (fracTab[0] == 0)
 		currentPower--;
 
-	cout <<"tab0: "<<fracTab[0] << endl;
-
-	cout << "pow: ";
-	cout << currentPower << endl;
 
 	while (fracIterator <= (s.getFraction() + 2))
 	{
@@ -138,7 +134,6 @@ void FloatNumber::dec2float(float inputNumber)
 			currentBit = 0;
 		}
 
-		
 		if (fracIterator == (s.getFraction()) + 1)
 			bitR = currentBit;
 		if (fracIterator == (s.getFraction()) + 2)
@@ -154,14 +149,27 @@ void FloatNumber::dec2float(float inputNumber)
 		}
 
 
-		fracTab[fracIterator] = currentBit;
-		fracIterator++;
 
-		if (fracTab[0] == 0)
+		if (currentPower < minRange)
+		{
+			currentPower = minRange;
+			denormalized = true;
+			fracTab[0] = 0;
+			fracIterator++;
+			
+		}
+		if (fracTab[0] == 0&&denormalized==false)
 		{
 			fracIterator--;
 			currentPower--;
 		}
+
+
+		
+			fracTab[fracIterator] = currentBit;
+			fracIterator++;
+		
+		//cout << "halo\n";
 
 	}
 
@@ -173,9 +181,10 @@ void FloatNumber::dec2float(float inputNumber)
 
 
 	currentPower += decPlace;
-	std::cout << "\npotega: "<<currentPower;
-	std::cout << "\ndecplace" << decPlace << endl;
-
+	std::cout << "\npotega: " << currentPower << endl;
+	
+	if (denormalized)
+		cout << "zdenormalizowany" << endl;
 
 
 	

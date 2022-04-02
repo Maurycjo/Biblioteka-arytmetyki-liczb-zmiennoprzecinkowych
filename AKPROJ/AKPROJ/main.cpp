@@ -8,7 +8,7 @@ int main()
 {
 	Standart s(3, 4);
 	FloatNumber num(s);
-	num.dec2float(0.1875);
+	num.dec2float(0.01875);
 
 
 	
