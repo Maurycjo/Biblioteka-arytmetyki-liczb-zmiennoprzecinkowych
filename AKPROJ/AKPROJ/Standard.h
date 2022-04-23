@@ -1,11 +1,12 @@
 #pragma once
-static class Standart
+
+static class Standard
 {
 private:
 	//domyslne wartosci dla mnoznika i wykladnika
 	int exponent = 3; //wykladnk
 	int fraction = 4; //mnoznik
-	
+
 
 public:
 	void setStandart(int exp, int frac)
@@ -13,9 +14,9 @@ public:
 		exponent = exp;
 		fraction = frac;
 	}
-	Standart()
+	Standard()
 	{}
-	Standart(int exp, int frac)
+	Standard(int exp, int frac)
 	{
 		setStandart(exp, frac);
 	}
@@ -30,6 +31,4 @@ public:
 		return fraction;
 	}
 
-
 };
-

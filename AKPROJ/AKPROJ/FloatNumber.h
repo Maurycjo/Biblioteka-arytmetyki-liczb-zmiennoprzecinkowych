@@ -1,21 +1,20 @@
 #pragma once
-#include "Standart.h"
+#include "Standard.h"
 #include <iterator>
 #include <iostream>
 #include <vector>
 class FloatNumber
 {
 private:
-	Standart s;
-	bool* table;
-	bool* grs;
+	Standard s;
+	std::vector<uint8_t> table;
+	std::vector<uint8_t> grs;
 	int size;
 	
 	
 
 public:
-	FloatNumber(Standart s);
-	~FloatNumber();
+	void setStandard(Standard s);
 	void dec2float(float inputNumber);
 
 	

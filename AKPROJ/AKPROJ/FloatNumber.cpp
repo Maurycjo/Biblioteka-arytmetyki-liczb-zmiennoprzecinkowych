@@ -1,192 +1,147 @@
 #include "FloatNumber.h"
 #include <iostream>
 #include <math.h>
+#include <format>
+#include <cassert>
+#include <cmath>
 
 
-using namespace std;
 
 
-FloatNumber::FloatNumber(Standart s)
+
+
+void FloatNumber::setStandard(Standard s)
 {
 	this->s = s;
-	size = 1 + s.getExponent() + s.getFraction();
-	table = new bool[size];
-	grs = new bool[3];
-}
-FloatNumber::~FloatNumber()
-{
-	delete[] table;
-	delete[] grs;
+	size = s.getExponent() + s.getFraction() + 1;
+
 }
 
 
-
-
-/*
-1 przypadek konczy konwersje na liczbie calkowitej
-2 przypadek dopisuje cyfry do mnoznika z ulamka
-3 przypadek wartosc przed przecinkiem 0 i leci cyfry z samego ulamka
-4 leci tak dobrze z tego ulamka ze trza zdenormalizowac
-*/
 void FloatNumber::dec2float(float inputNumber)
 {
 
+	std::vector<uint8_t> fracTab;		//vector mnoznika
+	std::vector<uint8_t> expTab;		//vector wykladnika 
 
-	bool* fracTab = new bool[s.getFraction()+1];
-	bool* expTab = new bool[s.getExponent()];
-	fracTab[0] = 0;
+	uint8_t byte = 0b00000000;			//bajt do zapisu do vectora
+	uint8_t byteIterator = 0b10000000;	//bajt do zwiekszania bajtu
 
-	int number = inputNumber;						//czesc calkowita liczby
-	float frac = inputNumber - float(number);		//czesc ulamkowa liczby
 
+	bool normalized = false;
+
+
+
+
+	int number = inputNumber;
+	int decPlace = 0;
+
+
+	int tempNumber = number;
 	
-	
+	std::cout << "realNumber: "<<std::format("{:b}", number) << std::endl;
 
-		//najwiekszy mozliwy wykladnik
-	int mask = pow(2, s.getExponent()) - 1 -pow(2, (s.getExponent() - 1));
-	int minRange = 1 - mask;
-	int maxRange = pow(2, s.getExponent())-2- mask;
-	int currentPower = 0;							//aktualny wykladnik
-	int twoPow = 1;									//do odejmowania przy konwersji
-	bool currentBit;								//aktualny bit w konwersji
-	int fracIterator = 0;							//iterator po tablicy wykladnikow
-	bool bitR,bitS;									//bity R i S do zaokraglania
-	int decPlace = 0;								//aktualne miejsce przecinka 
-	bool denormalized = false;						//okreslenie czy trzeba denormalizowac liczbe
 
-	
-	
-	//ustalenie njawiekszej potegi dwojki mniejszej od czesci calkowitej liczby
-	while (twoPow <= number)
+	while (tempNumber > 0)
 	{
-		
-		twoPow *= 2;
+		tempNumber /= 2;
+		decPlace++;
 	}
-	twoPow /= 2;
 
+	//std::cout << pow(2, decPlace - 2) << std:: endl;
+	//std::cout << decPlace - 1 << std::endl;
 
-
-
-	
-	//zamiana czesci calkowitej na liczbe wynikowa
-	while (twoPow>0)
+	if (decPlace > 0)
 	{
-		//konwersja zrealizowana przez odejmowanie poteg dwojki
-		if (twoPow <= number)
-		{
-			number -= twoPow;
-			currentBit = 1;
-		}
-		else
-		{
-			currentBit = 0;
-		}
-		twoPow /= 2;
+		normalized = true;
+		decPlace--;
 
-		if (fracIterator > s.getFraction())
+		//std::cout << std::format("{:b}", number / 2048) << std::endl;
+
+
+
+		if (number / int(pow(2, decPlace)) == 1)
 		{
-			
-			if (fracIterator == (s.getFraction()) + 1)
-				bitR = currentBit;
-			if (fracIterator == (s.getFraction()) + 2)
-			{
-				if (currentBit == 1)
-				{
-					bitS = 1;
-				}
-				else if (number != 0)
-					bitS = 1;
-				else
-					bitS = 0;
-			}
-			currentPower++;
+			number = number - pow(2, decPlace);
 			
 		}
-		else
-		{
-			fracTab[fracIterator] = currentBit;
-		}
-		if (fracIterator== s.getFraction())
-		{
-			decPlace = fracIterator;
-		}
-			fracIterator++;
 
+		
+		
 	}
-	
-	if (fracTab[0] == 0)
-		currentPower--;
 
 
-	while (fracIterator <= (s.getFraction() + 2))
+
+	for (int i = 0; i < decPlace; i++)
 	{
 		
-		
+		//std::cout << "number: " << number << std::endl;
 
-		frac *= 2;
-		if (frac >= 1)
-		{
-			frac -= 1;
-			currentBit = 1;
-		}
-		else
-		{
-			currentBit = 0;
-		}
-
-		if (fracIterator == (s.getFraction()) + 1)
-			bitR = currentBit;
-		if (fracIterator == (s.getFraction()) + 2)
-		{
-			if (currentBit == 1)
-			{
-				bitS = 1;
-			}
-			else if (frac != 0)
-				bitS = 1;
-			else
-				bitS = 0;
-		}
-
-
-
-		if (currentPower < minRange)
-		{
-			currentPower = minRange;
-			denormalized = true;
-			fracTab[0] = 0;
-			fracIterator++;
 			
-		}
-		if (fracTab[0] == 0&&denormalized==false)
+		//std::cout << std::format("{:b}", byteIterator)<<"\n";
+
+		if(number/int(pow(2, decPlace-i-1))==1)
 		{
-			fracIterator--;
-			currentPower--;
+			//std::cout << "tuatj\n";
+			number = number - int(pow(2, decPlace-i-1));
+			byte += byteIterator;
+		}
+
+		byteIterator>>= 1;
+
+		if (byteIterator == 0b00000000)
+		{
+			fracTab.push_back(byte);
+			byteIterator = 0b10000000;
+			byte = 0;
 		}
 
 
-		
-			fracTab[fracIterator] = currentBit;
-			fracIterator++;
-		
-		//cout << "halo\n";
 
 	}
 
-	for (int i = 0; i <= s.getFraction(); i++)
+
+	std::cout<<std::format("{:b}", byte) << std::endl;
+
+	if (byteIterator!=0b10000000)
+		fracTab.push_back(byte);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	for (auto i : fracTab)
 	{
-		std::cout << fracTab[i] << " ";
+		std::cout << std::format("{:b}", i)<<" ";
 	}
-	std::cout << "RS" << bitR << bitS;
 
 
-	currentPower += decPlace;
-	std::cout << "\npotega: " << currentPower << endl;
+	std::cout << "\nvectorSize: " << fracTab.size();
+
+	/*
+	std::cout << "br: " << std::format("{:b}", byteIterator) << std::endl;
+	byteIterator=byteIterator >> 1;
+	std::cout << "ar: " << std::format("{:b}", byteIterator);
+	*/
+
 	
-	if (denormalized)
-		cout << "zdenormalizowany" << endl;
 
-
+	//fracTab.push_back(0b10001111);
+	//std::cout << std::format("{:b}", fracTab[0]);
 	
 
 		

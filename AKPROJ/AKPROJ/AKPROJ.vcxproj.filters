@@ -26,7 +26,7 @@
     <ClInclude Include="FloatNumber.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Standart.h">
+    <ClInclude Include="Standard.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
