@@ -7,8 +7,11 @@ class FloatNumber
 {
 private:
 	Standard s;
-	std::vector<uint8_t> table;
-	std::vector<uint8_t> grs;
+	bool sign;
+	std::vector<uint8_t> floatNumberBits;
+	
+
+
 	int size;
 	
 	
@@ -16,6 +19,7 @@ private:
 public:
 	void setStandard(Standard s);
 	void dec2float(float inputNumber);
+	void displayNumberBinary();
 
 	
 };

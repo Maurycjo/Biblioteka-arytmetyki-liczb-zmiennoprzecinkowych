@@ -22,32 +22,41 @@ void FloatNumber::setStandard(Standard s)
 void FloatNumber::dec2float(float inputNumber)
 {
 
-	std::vector<uint8_t> fracTab;		//vector mnoznika
-	std::vector<uint8_t> expTab;		//vector wykladnika 
+	std::vector<uint8_t> fracTab;						//vector mnoznika
+	std::vector<uint8_t> expTab;						//vector wykladnika 
 
-	uint8_t byte = 0b00000000;			//bajt do zapisu do vectora
-	uint8_t byteIterator = 0b10000000;	//bajt do zwiekszania bajtu
+	uint8_t byte = 0b00000000;							//bajt do zapisu do vectora
+	uint8_t byteIterator = 0b10000000;					//bajt do zwiekszania bajtu
 
-	int expLoad = pow(2, (s.getExponent()*8 - 1)) - 1;
-	int expMaxRange = pow(2, s.getExponent()*8)-2-expLoad;
-	int expMinRange = 1 - expLoad;
-	int expValue = 0;
+	bool bitR= 0, bitS = 0;								//bity r i s do zaokraglania										//znak liczby
+	int expLoad = pow(2, (s.getExponent()*8 - 1)) - 1;	//obciazenie wykladnika		
+	int expMaxRange = pow(2, s.getExponent()*8)-2-expLoad;//maksymalna warosc wykladnika 
+	int expMinRange = 1 - expLoad;						//min wartosc wykladnika
+	bool denormalized = false;							//czy liczba zdenormalizowana
+
+
+
+	if (inputNumber < 0)
+	{
+		this->sign = 1;		//liczba ujemna
+		inputNumber *= -1;
+	}
+	else
+		this->sign = 0;		//liczba dodatnia
+
+
+	int number = inputNumber;							//czesc calkowita liczby
+	float afterTheDecPoint = inputNumber - number;		//czesc przecinkowa liczby
+	int decPlace = 0;									//miejsce przecinka, wykladnik
+	int tempNumber = number;							//liczba pomocnicza
+	int fracIterator = 0;								//iterator po mnozniku
+
 
 	
-
-	bool denormalized = false;
-	int number = inputNumber;
-	float afterTheDecPoint = inputNumber - number;
-	int decPlace = 0;
-	int tempNumber = number;
-	int fracIterator = 0;				//iterator po mnozniku
-
 
 
 	std::cout << "obciazenie: " << expLoad << "\n";
 	std::cout << "<" << expMinRange << "; " << expMaxRange << ">\n";
-	std::cout << "realNumber: "<<std::format("{:b}", number) << std::endl;
-
 
 	while (tempNumber > 0)
 	{
@@ -55,20 +64,24 @@ void FloatNumber::dec2float(float inputNumber)
 		decPlace++;
 	}
 
-	
+	//nieskonoczonosc 
 	if (decPlace > expMaxRange)
 	{
-		std::cout << "infinity";
+		for (int i = 0; i < s.getExponent(); i++)
+		{
+			this->floatNumberBits.push_back(0b11111111);
+		}
+		for (int i = s.getExponent(); i < s.getFraction() + s.getExponent(); i++)
+		{
+			this->floatNumberBits.push_back(0);
+		}
 		return;
 	}
 
-
 	if (decPlace > 0)
 	{
-		
 		decPlace--;
 		
-
 		if (number / int(pow(2, decPlace)) == 1)
 		{
 			number = number - pow(2, decPlace);	
@@ -115,7 +128,7 @@ void FloatNumber::dec2float(float inputNumber)
 		afterTheDecPoint -= 1;
 
 	}
-
+	//konwersja czesci przecinkowej
 	while ((fracIterator < s.getFraction() * 8)&&afterTheDecPoint!=0)
 	{
 		afterTheDecPoint *= 2;
@@ -151,6 +164,7 @@ void FloatNumber::dec2float(float inputNumber)
 	byte = 0;
 	byteIterator = 0b00000001;
 
+	std::cout << "wykladnik: " << decPlace << std::endl;
 	decPlace += expLoad;
 
 	while (decPlace>0)
@@ -182,7 +196,11 @@ void FloatNumber::dec2float(float inputNumber)
 	}
 
 
+	this->floatNumberBits.reserve(expTab.size() + fracTab.size());
+	this->floatNumberBits.insert(floatNumberBits.end(), expTab.begin(), expTab.end());
+	this->floatNumberBits.insert(floatNumberBits.end(), fracTab.begin(), fracTab.end());
 
+	/*
 	for (auto i : expTab)
 	{
 		std::cout<<std::format("{:b}", i) << " ";
@@ -193,26 +211,39 @@ void FloatNumber::dec2float(float inputNumber)
 	{
 		std::cout << std::setw(8) << std::format("{:b}", i) << " ";
 	}
+	*/
 
 
 
-
-	//std::cout << "wykladnik: " << decPlace << std::endl;
+	
 	if(denormalized)
 	std::cout << "\ndenormalized"<< std::endl;
-	std::cout << "\nvectorSize: " << fracTab.size();
+	std::cout << "\nvectorSize: " << fracTab.size() << std::endl;
 
 	/*
 	std::cout << "br: " << std::format("{:b}", byteIterator) << std::endl;
 	byteIterator=byteIterator >> 1;
 	std::cout << "ar: " << std::format("{:b}", byteIterator);
 	*/
-
-	
-
 	//fracTab.push_back(0b10001111);
 	//std::cout << std::format("{:b}", fracTab[0]);
 	
+}
 
-		
+void FloatNumber::displayNumberBinary()
+{
+
+	std::cout << sign << "|";
+
+	for (int i = 0; i < s.getExponent(); i++)
+	{
+		std::cout << std::format("{:b}", this->floatNumberBits[i]) << " ";
+	}
+	std::cout << "|";
+	for (int i = s.getExponent(); i < s.getFraction()+s.getExponent(); i++)
+	{
+		std::cout << std::format("{:b}", this->floatNumberBits[i]) << " ";
+	}
+	std::cout << std::endl;
+
 }
