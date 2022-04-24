@@ -5,10 +5,10 @@
 
 int main()
 {
-	Standard s(3, 4);
+	Standard s(1, 3);
 	FloatNumber number;
 	number.setStandard(s);
-	number.dec2float(14551.75);
+	number.dec2float(0.1234124);
 
 
 	

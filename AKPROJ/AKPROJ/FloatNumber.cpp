@@ -4,6 +4,7 @@
 #include <format>
 #include <cassert>
 #include <cmath>
+#include <iomanip>
 
 
 
@@ -27,13 +28,24 @@ void FloatNumber::dec2float(float inputNumber)
 	uint8_t byte = 0b00000000;			//bajt do zapisu do vectora
 	uint8_t byteIterator = 0b10000000;	//bajt do zwiekszania bajtu
 
+	int expLoad = pow(2, (s.getExponent()*8 - 1)) - 1;
+	int expMaxRange = pow(2, s.getExponent()*8)-2-expLoad;
+	int expMinRange = 1 - expLoad;
+	int expValue = 0;
 
-	bool normalized = false;
+	
+
+	bool denormalized = false;
 	int number = inputNumber;
 	float afterTheDecPoint = inputNumber - number;
 	int decPlace = 0;
 	int tempNumber = number;
-	int fracIterator = 0;				//iterator po mnozniku, jak przechodzi sie z liczby calkowitej do przecinkowej
+	int fracIterator = 0;				//iterator po mnozniku
+
+
+
+	std::cout << "obciazenie: " << expLoad << "\n";
+	std::cout << "<" << expMinRange << "; " << expMaxRange << ">\n";
 	std::cout << "realNumber: "<<std::format("{:b}", number) << std::endl;
 
 
@@ -43,55 +55,69 @@ void FloatNumber::dec2float(float inputNumber)
 		decPlace++;
 	}
 
-	//std::cout << pow(2, decPlace - 2) << std:: endl;
-	//std::cout << decPlace - 1 << std::endl;
+	
+	if (decPlace > expMaxRange)
+	{
+		std::cout << "infinity";
+		return;
+	}
+
 
 	if (decPlace > 0)
 	{
-		normalized = true;
+		
 		decPlace--;
-
-		//std::cout << std::format("{:b}", number / 2048) << std::endl;
+		
 
 		if (number / int(pow(2, decPlace)) == 1)
 		{
 			number = number - pow(2, decPlace);	
 		}	
-	}
 
-	for (int i = 0; i < decPlace; i++)
-	{
+		//konwersja czesci calkowitej, tylko wtedy kiedy ta czesc calkowita istnieje
+		for (int i = 0; i < decPlace; i++)
+		{
 		
-		//std::cout << "number: " << number << std::endl;
-		//std::cout << std::format("{:b}", byteIterator)<<"\n";
+			if(number/int(pow(2, decPlace-i-1))==1)
+			{
+				//std::cout << "tuatj\n";
+				number = number - int(pow(2, decPlace-i-1));
+				byte += byteIterator;
+			}
 
-		if(number/int(pow(2, decPlace-i-1))==1)
-		{
-			//std::cout << "tuatj\n";
-			number = number - int(pow(2, decPlace-i-1));
-			byte += byteIterator;
+			byteIterator>>= 1;
+
+			if (byteIterator == 0b00000000)
+			{
+				fracTab.push_back(byte);
+				byteIterator = 0b10000000;
+				byte = 0;
+			}
+			fracIterator++;
 		}
+	}
+	else //przypadek kiedy liczba <1, wtedy tez trzeba ustalic czy liczbe trzeba zdenormalizowac
+	{
 
-		byteIterator>>= 1;
-
-		if (byteIterator == 0b00000000)
+		//ustalenie miejsca przecinka
+		while (afterTheDecPoint < 1)
 		{
-			fracTab.push_back(byte);
-			byteIterator = 0b10000000;
-			byte = 0;
+			afterTheDecPoint *= 2;
+			decPlace--;
+			if (decPlace == expMinRange)
+			{
+				denormalized = true;
+			}
 		}
-
-		fracIterator++;
+	
+		//pierwszy bit jest ukryty
+		if(!denormalized)
+		afterTheDecPoint -= 1;
 
 	}
-
-	//std::cout << "fracIterator: " << fracIterator << std::endl;
-	//std::cout << "loop: " <<s.getFraction()*8 << std::endl;
-	//std::cout<<std::format("{:b}", byte) << std::endl;
 
 	while ((fracIterator < s.getFraction() * 8)&&afterTheDecPoint!=0)
 	{
-		//std::cout << "i: " << fracIterator << " ";
 		afterTheDecPoint *= 2;
 		if (afterTheDecPoint >= 1)
 		{
@@ -107,15 +133,11 @@ void FloatNumber::dec2float(float inputNumber)
 			byte = 0;
 			byteIterator = 0b10000000;
 		}
-
 		fracIterator++;
 	}
 
-	//std::cout << "fracIterator: " << fracIterator << std::endl;
-	//std::cout << "s.getfrac: " << << std::endl;
 	if (fracIterator < s.getFraction()*8)
 	{
-		std::cout << "halo";
 		fracTab.push_back(byte);
 		byte = 0;
 	}
@@ -125,16 +147,59 @@ void FloatNumber::dec2float(float inputNumber)
 	}
 
 
-	
+	//konwersja wykladnika
+	byte = 0;
+	byteIterator = 0b00000001;
 
+	decPlace += expLoad;
 
-
-	for (auto i : fracTab)
+	while (decPlace>0)
 	{
-		std::cout << std::format("{:b}", i)<<" ";
+
+		if (decPlace % 2 == 1)
+		{
+			byte += byteIterator;
+		}
+
+		byteIterator <<= 1;
+		if (byteIterator == 0)
+		{
+			expTab.insert(expTab.begin(), byte);
+			byte = 0;
+			byteIterator = 0b00000001;
+
+		}
+		decPlace /= 2;
+	}
+
+	if (byteIterator != 1)
+	{
+		expTab.insert(expTab.begin(), byte);
+	}
+	while (expTab.size() != s.getExponent())
+	{
+		expTab.insert(expTab.begin(), 0);
 	}
 
 
+
+	for (auto i : expTab)
+	{
+		std::cout<<std::format("{:b}", i) << " ";
+	}
+
+	std::cout << "|";
+	for (auto i : fracTab)
+	{
+		std::cout << std::setw(8) << std::format("{:b}", i) << " ";
+	}
+
+
+
+
+	//std::cout << "wykladnik: " << decPlace << std::endl;
+	if(denormalized)
+	std::cout << "\ndenormalized"<< std::endl;
 	std::cout << "\nvectorSize: " << fracTab.size();
 
 	/*
