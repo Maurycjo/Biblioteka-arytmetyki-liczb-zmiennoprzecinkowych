@@ -20,12 +20,12 @@ public:
 	{
 		setStandart(exp, frac);
 	}
-	//zwraca liczbe bitow wykladnika
+	//zwraca liczbe bajtow wykladnika
 	int getExponent()
 	{
 		return exponent;
 	}
-	//zwraca liczbe bitow mnoznika
+	//zwraca liczbe bajtow mnoznika
 	int getFraction()
 	{
 		return fraction;

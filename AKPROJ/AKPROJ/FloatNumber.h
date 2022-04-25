@@ -15,8 +15,8 @@ private:
 public:
 
 	void rrc(uint8_t& byte, uint8_t& rotCarry);						//rotacja w prawo z przeniesieniem 
-	void rlcSevBytes(std::vector<uint8_t> &number);
-	void rrcSevBytes(std::vector<uint8_t>& number);
+	void rlcSevBytes(std::vector<uint8_t> &number, uint8_t& carry);
+	void rrcSevBytes(std::vector<uint8_t>& number, uint8_t &carry);
 
 	void setStandard(Standard s);
 	void dec2float(float inputNumber);

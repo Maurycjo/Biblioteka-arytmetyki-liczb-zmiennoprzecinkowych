@@ -20,7 +20,6 @@ void FloatNumber::setStandard(Standard s)
 
 }
 
-
 void FloatNumber::dec2float(float inputNumber)
 {
 
@@ -55,8 +54,8 @@ void FloatNumber::dec2float(float inputNumber)
 	
 
 
-	std::cout << "obciazenie: " << expLoad << "\n";
-	std::cout << "<" << expMinRange << "; " << expMaxRange << ">\n";
+	//std::cout << "obciazenie: " << expLoad << "\n";
+	//std::cout << "<" << expMinRange << "; " << expMaxRange << ">\n";
 
 
 	if (inputNumber == 0)
@@ -177,7 +176,7 @@ void FloatNumber::dec2float(float inputNumber)
 	byte = 0;
 	byteIterator = 0b00000001;
 
-	std::cout << "wykladnik: " << decPlace << std::endl;
+	//std::cout << "wykladnik: " << decPlace << std::endl;
 	decPlace += expLoad;
 
 	while (decPlace>0)
@@ -231,7 +230,7 @@ void FloatNumber::dec2float(float inputNumber)
 	
 	if(denormalized)
 	std::cout << "\ndenormalized"<< std::endl;
-	std::cout << "\nvectorSize: " << fracTab.size() << std::endl;
+	//std::cout << "\nvectorSize: " << fracTab.size() << std::endl;
 
 	/*
 	std::cout << "br: " << std::format("{:b}", byteIterator) << std::endl;
@@ -263,15 +262,12 @@ void FloatNumber::displayNumberBinary()
 
 }
 
-
-
 uint8_t FloatNumber::addTwoBytes(uint8_t byteA, uint8_t byteB, uint8_t& carry)
 {
 	uint8_t result = 0;
 
 	uint8_t mask = 0b00000001;	//maska do uzyskiwania pojedynczych bitow bajtu
 	uint8_t bitA, bitB, bitS;	//pojedyncze bity bajtu
-
 
 	for (int i = 0; i < 8; i++)
 	{
@@ -305,7 +301,6 @@ uint8_t FloatNumber::addTwoBytes(uint8_t byteA, uint8_t byteB, uint8_t& carry)
 
 	return result;
 }
-
 
 void FloatNumber::rlc(uint8_t& byte, uint8_t& rotCarry)
 {
@@ -356,20 +351,17 @@ void FloatNumber::rrc(uint8_t& byte, uint8_t& rotCarry)
 	
 }
 
-void FloatNumber::rlcSevBytes(std::vector<uint8_t> &number)
+void FloatNumber::rlcSevBytes(std::vector<uint8_t> &number, uint8_t& carry)
 {
-	uint8_t carry = 0;
-
+	
 	for (int i = number.size() - 1; i >= 0; i--)
 	{
 		rlc(number[i], carry);
 	}
 }
 
-void FloatNumber::rrcSevBytes(std::vector<uint8_t>& number)
+void FloatNumber::rrcSevBytes(std::vector<uint8_t>& number, uint8_t& carry)
 {
-
-	uint8_t carry = 0;
 
 	for (auto &i : number)
 	{
@@ -378,26 +370,90 @@ void FloatNumber::rrcSevBytes(std::vector<uint8_t>& number)
 
 }
 
-
-FloatNumber FloatNumber::multiply(FloatNumber number1, FloatNumber number2)
+FloatNumber FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 {
 	FloatNumber result;
-	result.setStandard(number1.s);
+	result.setStandard(numberA.s);
 	result.dec2float(0);
 
 	//M1 *2^E1* M2*2E2=(M1*M2)*2^(E1+E2)
 
+	
+	std::vector<uint8_t> fracA;
+	std::vector<uint8_t> fracB;
+	std::vector<uint8_t> fracResult(s.getFraction() * 2+1, 0);											//inicjalizacja zerami
 
 
 
-	for (int i = 0; i < s.getFraction() * 8; i++)
+	//this->floatNumberBits.reserve(expTab.size() + fracTab.size());
+	//this->floatNumberBits.insert(floatNumberBits.end(), expTab.begin(), expTab.end());
+	//this->floatNumberBits.insert(floatNumberBits.end(), fracTab.begin(), fracTab.end());
+
+	
+	fracA.reserve(s.getExponent());
+	fracB.reserve(s.getExponent());
+
+	
+	fracA.insert(fracA.begin(), numberA.floatNumberBits.begin() + s.getExponent(), numberA.floatNumberBits.end());
+	fracB.insert(fracB.begin(), numberB.floatNumberBits.begin() + s.getExponent(), numberB.floatNumberBits.end());
+
+
+	//tymaczasowo przyjmuje ze liczby nie sa zdenormalizowane(do zmiany!!!)
+
+	fracA.insert(fracA.begin(), 1);	//dodanie bajtow z bitem ukrytym
+	fracB.insert(fracB.begin(), 1);
+
+	
+	//std::copy(numberA.floatNumberBits.begin() + s.getExponent(), numberA.floatNumberBits.end(), fracA);	//kopiowanie mnoznika z liczby A
+	//std::copy(numberB.floatNumberBits.begin() + s.getExponent(), numberB.floatNumberBits.end(), fracB);	//kopiowanie mnoznika z liczby B
+	for (int i = 0; i < s.getFraction(); i++)
 	{
+		fracA.insert(fracA.begin(), 0);		//do przeskalowywania tej liczby potrzebne dwa razy wiecej bajtow
+	}
 
 
+	std::cout << "copiedFracA\n";
+	for (auto i : fracA)
+	{
+		std::cout << std::bitset<8>(i) << " ";
+	}
 
+	std::cout << "\ncopiedFracB\n";
+	for (auto i : fracB)
+	{
+		std::cout << std::bitset<8>(i) << " ";
+	}
+
+	std::cout << "\n";
+
+
+	uint8_t carryFromRl = 0, carryFromRr = 0, carryFromAdd = 0;
+
+	for (int i = 0; i < (s.getFraction()+1) * 8; i++)
+	{
+		
+		rrcSevBytes(fracB, carryFromRr);
+
+		if (carryFromRr == 1)
+		{
+			
+			for (int j = 0; j <( s.getFraction() * 2)+1; j++)
+			{
+				fracResult[j] = addTwoBytes(fracResult[j], fracA[j], carryFromAdd);		//dodanie przeskalowanego iloczynu czesciowego to mnoznika wyniku
+			}
+
+		}
+
+		rlcSevBytes(fracA, carryFromRl);
 
 	}
 
+
+
+	for (auto i : fracResult)
+	{
+		std::cout << std::bitset<8>(i) << " ";
+	}
 
 
 	
