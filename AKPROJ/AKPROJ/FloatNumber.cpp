@@ -5,6 +5,9 @@
 #include <cassert>
 #include <cmath>
 #include <iomanip>
+#include <bit>
+#include <bitset>
+
 
 
 
@@ -14,7 +17,6 @@
 void FloatNumber::setStandard(Standard s)
 {
 	this->s = s;
-	size = s.getExponent() + s.getFraction() + 1;
 
 }
 
@@ -28,13 +30,11 @@ void FloatNumber::dec2float(float inputNumber)
 	uint8_t byte = 0b00000000;							//bajt do zapisu do vectora
 	uint8_t byteIterator = 0b10000000;					//bajt do zwiekszania bajtu
 
-	bool bitR= 0, bitS = 0;								//bity r i s do zaokraglania										//znak liczby
+	bool bitR= 0, bitS = 0;								//bity r i s do zaokraglania
 	int expLoad = pow(2, (s.getExponent()*8 - 1)) - 1;	//obciazenie wykladnika		
 	int expMaxRange = pow(2, s.getExponent()*8)-2-expLoad;//maksymalna warosc wykladnika 
 	int expMinRange = 1 - expLoad;						//min wartosc wykladnika
 	bool denormalized = false;							//czy liczba zdenormalizowana
-
-
 
 	if (inputNumber < 0)
 	{
@@ -57,6 +57,17 @@ void FloatNumber::dec2float(float inputNumber)
 
 	std::cout << "obciazenie: " << expLoad << "\n";
 	std::cout << "<" << expMinRange << "; " << expMaxRange << ">\n";
+
+
+	if (inputNumber == 0)
+	{
+		for (int i = 0; i < s.getExponent() + s.getFraction();i++)
+		{
+			floatNumberBits.push_back(0);
+		}
+		return;
+	}
+
 
 	while (tempNumber > 0)
 	{
@@ -111,7 +122,7 @@ void FloatNumber::dec2float(float inputNumber)
 	}
 	else //przypadek kiedy liczba <1, wtedy tez trzeba ustalic czy liczbe trzeba zdenormalizowac
 	{
-
+		
 		//ustalenie miejsca przecinka
 		while (afterTheDecPoint < 1)
 		{
@@ -120,6 +131,8 @@ void FloatNumber::dec2float(float inputNumber)
 			if (decPlace == expMinRange)
 			{
 				denormalized = true;
+				decPlace--;
+				break;
 			}
 		}
 	
@@ -237,13 +250,34 @@ void FloatNumber::displayNumberBinary()
 
 	for (int i = 0; i < s.getExponent(); i++)
 	{
-		std::cout << std::format("{:b}", this->floatNumberBits[i]) << " ";
+		//std::cout << std::format("{:b}", this->floatNumberBits[i]) << " ";
+		std::cout << std::bitset<8>(floatNumberBits[i]) << " ";
 	}
 	std::cout << "|";
 	for (int i = s.getExponent(); i < s.getFraction()+s.getExponent(); i++)
 	{
-		std::cout << std::format("{:b}", this->floatNumberBits[i]) << " ";
+		//std::cout << std::format("{:b}", this->floatNumberBits[i]) << " ";
+		std::cout << std::bitset<8>(floatNumberBits[i]) << " ";
 	}
 	std::cout << std::endl;
+
+}
+
+
+FloatNumber FloatNumber::multiply(FloatNumber number1, FloatNumber number2)
+{
+	FloatNumber result;
+	result.setStandard(number1.s);
+
+	//M1 *2^E1* M2*2E2=(M1*M2)*2^(E1+E2)
+
+	
+
+
+
+
+
+	return result;
+
 
 }
