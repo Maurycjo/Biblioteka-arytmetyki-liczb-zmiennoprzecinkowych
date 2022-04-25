@@ -429,27 +429,49 @@ FloatNumber FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 
 	uint8_t carryFromRl = 0, carryFromRr = 0, carryFromAdd = 0;
 
+
+	std::cout << "****strefa testow****\n\n";
 	for (int i = 0; i < (s.getFraction()+1) * 8; i++)
 	{
-		
+		carryFromRr = 0;
 		rrcSevBytes(fracB, carryFromRr);
+
+		
 
 		if (carryFromRr == 1)
 		{
-			
+			std::cout << "frac ";
+			for (auto x : fracA)
+			{
+				std::cout << std::bitset<8>(x) << " ";
+			}
+			std::cout << "\n";
+
+		
+			carryFromAdd = 0;
 			for (int j = 0; j <( s.getFraction() * 2)+1; j++)
 			{
 				fracResult[j] = addTwoBytes(fracResult[j], fracA[j], carryFromAdd);		//dodanie przeskalowanego iloczynu czesciowego to mnoznika wyniku
 			}
+			
+
+
+			std::cout << "resl ";
+			for (auto x : fracResult)
+			{
+				std::cout << std::bitset<8>(x) << " ";
+			}
+			std::cout << "\n";
+
 
 		}
 
+		carryFromRl = 0;
 		rlcSevBytes(fracA, carryFromRl);
-
 	}
 
 
-
+	std::cout << "\n\nwynik\n";
 	for (auto i : fracResult)
 	{
 		std::cout << std::bitset<8>(i) << " ";
