@@ -2,6 +2,8 @@
 #include "FloatNumber.h"
 #include "Standard.h"
 
+#include <bitset>
+#include <bit>
 
 int main()
 {
@@ -11,8 +13,9 @@ int main()
 	number.dec2float(1.0000000000000000000000000000000000000001);
 	number.displayNumberBinary();
 
-
 	
+
+
 
 	return 0;
 }

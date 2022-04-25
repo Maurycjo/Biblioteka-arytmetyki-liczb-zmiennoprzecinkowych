@@ -9,7 +9,7 @@ private:
 	Standard s;
 	bool sign;
 	std::vector<uint8_t> floatNumberBits;							//vector liczby w standardzie
-	uint8_t addTwoBytes(uint8_t byte1, uint8_t byte2, bool& carry); // dodanie dwoch bajtow z wykrywaniemm przeniesienia
+	uint8_t addTwoBytes(uint8_t byteA, uint8_t byteB, uint8_t& carry); // dodanie dwoch bajtow z wykrywaniemm przeniesienia
 
 public:
 	void setStandard(Standard s);

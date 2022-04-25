@@ -264,19 +264,56 @@ void FloatNumber::displayNumberBinary()
 }
 
 
+
+uint8_t FloatNumber::addTwoBytes(uint8_t byteA, uint8_t byteB, uint8_t& carry)
+{
+	uint8_t result = 0;
+
+	uint8_t mask = 0b00000001;	//maska do uzyskiwania pojedynczych bitow bajtu
+	uint8_t bitA, bitB, bitS;	//pojedyncze bity bajtu
+
+
+	for (int i = 0; i < 8; i++)
+	{
+
+		if ((mask & byteA) == 0)
+		{
+			bitA = 0;
+		}
+		else
+		{
+			bitA = 1;
+		}
+
+		if ((mask & byteB) == 0)
+		{
+			bitB = 0;
+		}
+		else
+		{
+			bitB = 1;
+		}
+
+		bitS = (bitA ^ bitB) ^ carry;
+		carry = ((bitA ^ bitB) & carry) | (bitA & bitB);
+
+		if (bitS == 1)
+			result += mask;
+
+		mask <<= 1;
+	}
+
+	return result;
+}
+
 FloatNumber FloatNumber::multiply(FloatNumber number1, FloatNumber number2)
 {
 	FloatNumber result;
 	result.setStandard(number1.s);
+	result.dec2float(0);
 
 	//M1 *2^E1* M2*2E2=(M1*M2)*2^(E1+E2)
-
 	
-
-
-
-
-
 	return result;
 
 
