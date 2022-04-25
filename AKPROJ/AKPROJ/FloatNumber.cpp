@@ -306,6 +306,79 @@ uint8_t FloatNumber::addTwoBytes(uint8_t byteA, uint8_t byteB, uint8_t& carry)
 	return result;
 }
 
+
+void FloatNumber::rlc(uint8_t& byte, uint8_t& rotCarry)
+{
+
+	
+	
+	if (uint8_t(byte << 1) < byte)
+	{
+		byte <<= 1;
+		byte += rotCarry;
+		rotCarry = 1;
+	}
+	else
+	{
+		byte <<= 1;
+		byte += rotCarry;
+		rotCarry = 0;
+	}
+}
+
+void FloatNumber::rrc(uint8_t& byte, uint8_t& rotCarry)
+{
+
+	if (rotCarry == 0)
+	{
+		if (byte % 2 == 1)
+		{
+			rotCarry = 1;
+		}
+		else
+			rotCarry = 0;
+
+		byte >>= 1;
+	}
+	else
+	{
+		if (byte % 2 == 1)
+		{
+			rotCarry = 1;
+		}
+		else
+			rotCarry = 0;
+
+		byte >>= 1;
+		byte += 0b10000000;
+
+	}
+	
+}
+
+void FloatNumber::rlcSevBytes(std::vector<uint8_t> &number)
+{
+	uint8_t carry = 0;
+
+	for (int i = number.size() - 1; i >= 0; i--)
+	{
+		rlc(number[i], carry);
+	}
+}
+
+void FloatNumber::rrcSevBytes(std::vector<uint8_t>& number)
+{
+
+	uint8_t carry = 0;
+
+	for (auto &i : number)
+	{
+		rrc(i, carry);
+	}
+
+}
+
+
 FloatNumber FloatNumber::multiply(FloatNumber number1, FloatNumber number2)
 {
 	FloatNumber result;
@@ -313,6 +386,20 @@ FloatNumber FloatNumber::multiply(FloatNumber number1, FloatNumber number2)
 	result.dec2float(0);
 
 	//M1 *2^E1* M2*2E2=(M1*M2)*2^(E1+E2)
+
+
+
+
+	for (int i = 0; i < s.getFraction() * 8; i++)
+	{
+
+
+
+
+	}
+
+
+
 	
 	return result;
 
