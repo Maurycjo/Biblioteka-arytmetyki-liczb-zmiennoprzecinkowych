@@ -17,6 +17,17 @@ int main()
 
 
 
+	std::vector<uint8_t> inc{ 0b00001111, 0b11111111, 0b11111100 };
+
+	for (auto i : inc)
+		std::cout << std::bitset<8>(i) << " ";
+	std::cout << std::endl;
+
+	number.incSevBytes(inc);
+
+	for (auto i : inc)
+		std::cout << std::bitset<8>(i) << " ";
+	std::cout << std::endl;
 
 
 
@@ -28,8 +39,7 @@ int main()
 
 
 
-
-
+	/*
 
 	
 	FloatNumber numberA, numberB;
@@ -52,6 +62,7 @@ int main()
 	number.displayNumberBinary();
 
 	
+	*/
 
 
 	return 0;

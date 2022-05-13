@@ -348,29 +348,72 @@ void FloatNumber::rrcSevBytes(std::vector<uint8_t>& number, uint8_t& carry)
 
 }
 
+void FloatNumber::incSevBytes(std::vector<uint8_t>& number)
+{
+
+	for (int i = number.size() - 1; i >= 0; i--)
+	{
+
+		if (uint8_t(number[i] + 1) > number[i])
+		{
+
+			number[i]++;
+			return;
+		}
+		else
+		{
+			number[i]++;
+		}
+
+	}
+
+}
+
+
+
+
+
 FloatNumber FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 {
-	int counter = 0;
-
-
 	FloatNumber result;
 	result.setStandard(numberA.s);
 	result.dec2float(0);
 
 	//M1 *2^E1* M2*2E2=(M1*M2)*2^(E1+E2)
 
-	
+
+	//mnozniki
 	std::vector<uint8_t> fracA;
 	std::vector<uint8_t> fracB;
-	std::vector<uint8_t> fracResult(s.getFraction() * 2+1, 0);											//inicjalizacja zerami
-
-	
+	std::vector<uint8_t> fracResult(s.getFraction() * 2+1, 0);		//inicjalizacja zerami
 	fracA.reserve(s.getExponent());
-	fracB.reserve(s.getExponent());
-
-	
+	fracB.reserve(s.getExponent());	
 	fracA.insert(fracA.begin(), numberA.floatNumberBits.begin() + s.getExponent(), numberA.floatNumberBits.end());
 	fracB.insert(fracB.begin(), numberB.floatNumberBits.begin() + s.getExponent(), numberB.floatNumberBits.end());
+	//wykladniki
+	std::vector<uint8_t> exponentA;
+	std::vector<uint8_t> exponentB;
+	std::vector<uint8_t> exponentResult(s.getExponent(), 0);		
+	exponentA.reserve(s.getExponent());
+	exponentB.reserve(s.getExponent());
+	exponentA.insert(exponentA.begin(), numberA.floatNumberBits.begin(), numberA.floatNumberBits.begin() + s.getExponent());
+	exponentB.insert(exponentB.begin(), numberB.floatNumberBits.begin(), numberB.floatNumberBits.begin() + s.getExponent());
+	
+	uint8_t carryFromRl = 0, carryFromRr = 0, carryFromAdd = 0; //bajty przeniesienia rotacji w lewo, rotacji w prawo, dodawanie bajtow
+
+
+	//algorytm realizujacy wytworzenie bajtow wykladnika
+	carryFromAdd = 0;
+	for (int i = s.getExponent(); i >= 0; i--)
+	{
+		exponentResult[i] = exponentA[i] + exponentB[i];
+	}
+	if (carryFromAdd == 1)
+	{
+		//nieskonczonosc
+		std::cout << "INFINITY\n";
+		return result;
+	}
 
 
 	//tymaczasowo przyjmuje ze liczby nie sa zdenormalizowane(do zmiany!!!)
@@ -378,78 +421,52 @@ FloatNumber FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 	fracA.insert(fracA.begin(), 1);	//dodanie bajtow z bitem ukrytym
 	fracB.insert(fracB.begin(), 1);
 
-	
-	//std::copy(numberA.floatNumberBits.begin() + s.getExponent(), numberA.floatNumberBits.end(), fracA);	//kopiowanie mnoznika z liczby A
-	//std::copy(numberB.floatNumberBits.begin() + s.getExponent(), numberB.floatNumberBits.end(), fracB);	//kopiowanie mnoznika z liczby B
 	for (int i = 0; i < s.getFraction(); i++)
 	{
 		fracA.insert(fracA.begin(), 0);		//do przeskalowywania tej liczby potrzebne dwa razy wiecej bajtow
 	}
 
-
-	std::cout << "copiedFracA\n";
-	for (auto i : fracA)
-	{
-		std::cout << std::bitset<8>(i) << " ";
-	}
-
-	std::cout << "\ncopiedFracB\n";
-	for (auto i : fracB)
-	{
-		std::cout << std::bitset<8>(i) << " ";
-	}
-
-	std::cout << "\n";
-
-
-	uint8_t carryFromRl = 0, carryFromRr = 0, carryFromAdd = 0;
-
-
-	std::cout << "****strefa testow****\n\n";
+	
+	//algortym realizujacy wytworzenie bajtow mnoznika wyniku
 	for (int i = 0; i < (s.getFraction()+1) * 8; i++)
 	{
 		carryFromRr = 0;
 		rrcSevBytes(fracB, carryFromRr);
 
-
-		std::cout << "frac ";
-		for (auto x : fracA)
-		{
-			std::cout << std::bitset<8>(x) << " ";
-		}
-		std::cout << "\n";
-
-
-		std::cout << "resl ";
-		for (auto x : fracResult)
-		{
-			std::cout << std::bitset<8>(x) << " ";
-		}
-		std::cout << "\n";
-
-
-
-
 		if (carryFromRr == 1)
 		{
-			
-			counter++;
-
 			carryFromAdd = 0;
 			for (int j = s.getFraction()*2; j>=0; j--)
 			{
 				fracResult[j] = addTwoBytes(fracResult[j], fracA[j], carryFromAdd);		//dodanie przeskalowanego iloczynu czesciowego to mnoznika wyniku
 			}
-			
-
-
-			
-
 		}
-
 		carryFromRl = 0;
 		rlcSevBytes(fracA, carryFromRl);
 	}
+
+
+	carryFromRl = 0;
+	carryFromRr = 0;
+	carryFromAdd = 0;
+
+	while (carryFromRr == 0)
+	{
+
+		rlcSevBytes(fracResult, carryFromRl);
+
+		//inc byte
+		
+
+
+	}
+
+	
+
+
+
+
+
 
 
 	std::cout << "\n\nwynik\n";
@@ -458,9 +475,6 @@ FloatNumber FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 		std::cout << std::bitset<8>(i) << " ";
 	}
 
-	std::cout << "\n" << counter;
-
-	
 	return result;
 
 
