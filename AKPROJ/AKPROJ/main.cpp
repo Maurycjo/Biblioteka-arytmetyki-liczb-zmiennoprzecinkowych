@@ -7,28 +7,30 @@
 
 int main()
 {
+
+	double testA =16.123;
+	double testB = 4231.14;
 	
 
-	Standard s(2, 2);
+
+	std::cout << "*\n";
+
+	Standard s(1, 2);
 	FloatNumber number;
 	number.setStandard(s);
-	number.dec2float(float(113.5 * 113.5));
+	number.dec2float(double(testA*testB));
 	//number.displayNumberBinary();
 
 
-	
-	
 
-	
-	
 	
 	FloatNumber numberA, numberB, numberC;
 	numberA.setStandard(s);
 	numberB.setStandard(s);
 	numberC.setStandard(s);
 
-	numberA.dec2float(113.5);
-	numberB.dec2float(113.5);
+	numberA.dec2float(testA);
+	numberB.dec2float(testB);
 
 	std::cout << "numberA: ";
 	numberA.displayNumberBinary();
@@ -40,7 +42,7 @@ int main()
 
 	std::cout << "**multiply**\n";
 
-	numberC=numberC.multiply(numberA, numberB);
+	numberC.multiply(numberA, numberB);
 	numberC.displayNumberBinary();
 
 

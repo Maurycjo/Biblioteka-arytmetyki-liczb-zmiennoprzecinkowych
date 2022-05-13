@@ -338,6 +338,25 @@ void FloatNumber::incSevBytes(std::vector<uint8_t>& number)
 	}
 }
 
+void FloatNumber::decSevBytes(std::vector<uint8_t>& number)
+{
+	for (int i = number.size() - 1; i >= 0; i--)
+	{
+
+		if (number[i] > 0)
+		{
+			number[i]--;
+			return;
+		}
+		else
+		{
+			number[i] = 255;
+		}
+	}
+}
+
+
+
 std::vector<uint8_t> FloatNumber::generateBias()
 {
 	std::vector<uint8_t> bias{ 0b01111111 };
@@ -351,27 +370,25 @@ std::vector<uint8_t> FloatNumber::generateBias()
 
 
 
-void FloatNumber::setResultToInfinity(FloatNumber& number)
+void FloatNumber::setResultToInfinity(std::vector<uint8_t>& number)
 {
 	
 	for (int i = 0; i < s.getExponent(); i++)
-		number.floatNumberBits.push_back(255);
+		number.push_back(255);
 	
 
 	for (int i = 0; i < s.getFraction(); i++)
-		number.floatNumberBits.push_back(255);
+		number.push_back(0);
 
 }
 
 
-FloatNumber FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
+void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 {
 	//M1 *2^E1* M2*2E2=(M1*M2)*2^(E1+E2)
 
-	FloatNumber result;				//wynik iloraz zwracany
-	result.setStandard(numberA.s);
-	result.dec2float(0);
-	//result.floatNumberBits.reserve(s.getExponent() + s.getFraction());
+	setStandard(numberA.s);
+	
 
 	//sprawdzenie znaku ilorazu
 	bool resultSign = true;
@@ -383,7 +400,7 @@ FloatNumber FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 	{
 		resultSign = false;
 	}
-	result.sign = resultSign;
+	this->sign = resultSign;
 
 	//mnozniki
 	std::vector<uint8_t> fracA;
@@ -404,42 +421,28 @@ FloatNumber FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 	exponentB.insert(exponentB.begin(), numberB.floatNumberBits.begin(), numberB.floatNumberBits.begin() + s.getExponent());
 	exponentBias = generateBias();
 
-
+	
 	uint8_t carryFromRl = 0, carryFromRr = 0, carryFromAdd = 0, carryFromSubb = 0; //bajty przeniesienia rotacji w lewo, rotacji w prawo, dodawanie bajtow, odejmowania
 
 	//wytworzenie bajtow wykladnika
 	for (int i = (s.getExponent()-1); i >= 0; i--)
 	{
-		exponentResult[i] = addTwoBytes(exponentA[i], exponentB[i], carryFromAdd);
+		exponentResult[i+1] = addTwoBytes(exponentA[i], exponentB[i], carryFromAdd);
 	}
 	exponentResult[0] += carryFromAdd;
 	
-	std::cout << "przed\n";
-	for (auto i : exponentResult)
-		std::cout << std::bitset<8>(i) << " ";
-	std::cout << std::endl;
-
-
 	//mamy dwa obciazenia wiec jedno trzeba odjac
-	for (int i = (s.getExponent())-1; i >= 0; i--)
+	for (int i = (s.getExponent()-1); i >= 0; i--)
 	{
 		exponentResult[i+1] = subbTwoBytes(exponentResult[i+1], exponentBias[i], carryFromSubb);
 	}
 	exponentResult[0] -= carryFromSubb;
 
-	std::cout << "po\n";
-	for (auto i : exponentResult)
-		std::cout << std::bitset<8>(i) << " ";
-	std::cout << std::endl;
-
-
-
-
 	if (exponentResult[0] > 0)
 	{
 		std::cout << "infinity\n";
-		setResultToInfinity(result);
-		return result;
+		setResultToInfinity(this->floatNumberBits);
+		return;
 	}
 
 	exponentResult.erase(exponentResult.begin());		//usuniecie bufora
@@ -455,7 +458,6 @@ FloatNumber FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 		fracA.insert(fracA.begin(), 0);		//do przeskalowywania tej liczby potrzebne dwa razy wiecej bajtow
 	}
 
-	
 	//algortym realizujacy wytworzenie bajtow mnoznika wyniku
 	for (int i = 0; i < (s.getFraction()+1) * 8; i++)
 	{
@@ -474,46 +476,58 @@ FloatNumber FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 		rlcSevBytes(fracA, carryFromRl);
 	}
 
-
-
-	
-
-
 	carryFromRl = 0;
-	carryFromRr = 1;
+	carryFromRr = 0;
 	carryFromAdd = 0;
 
 	bool ifInfinity = false;
 
-	while (carryFromRl == 0 && ifInfinity==false)
+	//skalowanie w prawo, do wytworzenia postac 1,xxxx
+	if (fracResult[0] > 0)
 	{
-
-
-		rlcSevBytes(fracResult, carryFromRl);
-		incSevBytes(exponentResult);
-		
-
-		ifInfinity = true;
-		for (auto i : exponentResult)
+		while (fracResult[0] != 1)
 		{
-			if (i != 255)
+			rrcSevBytes(fracResult, carryFromRr);
+			incSevBytes(exponentResult);
+		}
+	}
+	else
+	{
+		//skalowanie w lewo do wytworzenia postac 1,xxxx
+
+		while (fracResult[0] != 1 && ifInfinity == false)
+		{
+
+			rlcSevBytes(fracResult, carryFromRl);
+			decSevBytes(exponentResult);
+
+			ifInfinity = true;
+			for (auto i : exponentResult)
 			{
-				ifInfinity = false;
-				break;
+				if (i != 255)
+				{
+					ifInfinity = false;
+					break;
+				}
 			}
 		}
-		
+
 	}
 
 	if (ifInfinity)
 	{
-		setResultToInfinity(result);
-		return result;
+		setResultToInfinity(this->floatNumberBits);
+		return;
 	}
 
 
-	//zrobic metode GRS
 
+	/*
+	tu bedzie wywolanie metedy zaokraglajacej GRS
+	*/
+
+
+	fracResult.erase(fracResult.begin());
 
 	
 	while (fracResult.size() != s.getFraction())
@@ -522,27 +536,10 @@ FloatNumber FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 
 	}
 	
-
-
-
-	std::cout << "*exp*" << std::endl;
 	for (auto i : exponentResult)
-		std::cout << std::bitset<8>(i) << " ";
-
-	std::cout << "\n*frac*" << std::endl;
-	for (auto i : fracResult)
-		std::cout << std::bitset<8>(i) << " ";
-
-	std::cout << std::endl;
-
-	setResultToInfinity(result);
-
-
-	for (auto i : exponentResult)
-		result.floatNumberBits.push_back(i);
+		this->floatNumberBits.push_back(i);
 
 	for (auto i : fracResult)
-		result.floatNumberBits.push_back(i);
+		this->floatNumberBits.push_back(i);
 
-	return result;
 }
