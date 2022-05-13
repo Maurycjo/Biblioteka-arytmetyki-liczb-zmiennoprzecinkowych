@@ -364,13 +364,21 @@ void FloatNumber::incSevBytes(std::vector<uint8_t>& number)
 		{
 			number[i]++;
 		}
-
 	}
-
 }
 
 
+void FloatNumber::setResultToInfinity(FloatNumber& number)
+{
+	
+	for (int i = 0; i < s.getExponent(); i++)
+		number.floatNumberBits.push_back(255);
+	
 
+	for (int i = 0; i < s.getFraction(); i++)
+		number.floatNumberBits.push_back(255);
+
+}
 
 
 FloatNumber FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
@@ -378,6 +386,23 @@ FloatNumber FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 	FloatNumber result;
 	result.setStandard(numberA.s);
 	result.dec2float(0);
+	//result.floatNumberBits.reserve(s.getExponent() + s.getFraction());
+
+
+	//sprawdzenie znaku ilorazu
+	bool resultSign = true;
+	if (numberA.sign == false && numberB.sign == false)
+	{
+		resultSign = false;
+	}
+	else if (numberA.sign == true&& numberB.sign == true)
+	{
+		resultSign = false;
+	}
+
+	result.sign = resultSign;
+
+
 
 	//M1 *2^E1* M2*2E2=(M1*M2)*2^(E1+E2)
 
@@ -404,14 +429,14 @@ FloatNumber FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 
 	//algorytm realizujacy wytworzenie bajtow wykladnika
 	carryFromAdd = 0;
-	for (int i = s.getExponent(); i >= 0; i--)
+	for (int i = s.getExponent()-1; i >= 0; i--)
 	{
 		exponentResult[i] = exponentA[i] + exponentB[i];
 	}
 	if (carryFromAdd == 1)
 	{
-		//nieskonczonosc
-		std::cout << "INFINITY\n";
+		//result
+		setResultToInfinity(result);
 		return result;
 	}
 
@@ -447,35 +472,67 @@ FloatNumber FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 
 
 	carryFromRl = 0;
-	carryFromRr = 0;
+	carryFromRr = 1;
 	carryFromAdd = 0;
 
-	while (carryFromRr == 0)
+	bool ifInfinity = false;
+
+	while (carryFromRr == 0 && ifInfinity==false)
 	{
 
 		rlcSevBytes(fracResult, carryFromRl);
-
-		//inc byte
+		incSevBytes(exponentResult);
 		
 
-
+		ifInfinity = true;
+		for (auto i : exponentResult)
+		{
+			if (i != 255)
+			{
+				ifInfinity = false;
+				break;
+			}
+		}
+		
 	}
 
-	
-
-
-
-
-
-
-
-	std::cout << "\n\nwynik\n";
-	for (auto i : fracResult)
+	if (ifInfinity)
 	{
-		std::cout << std::bitset<8>(i) << " ";
+		setResultToInfinity(result);
+		return result;
 	}
+
+
+	//zrobic metode GRS
+
+
+
+	while (fracResult.size() != s.getFraction())
+	{
+		fracResult.pop_back();
+
+	}
+
+
+	std::cout <<"***testy***"<< std::endl;
+
+	for (auto i : exponentResult)
+		std::cout <<std::bitset<8>(i);
+
+	std::cout << std::endl;
+	for (auto i : fracResult)
+		std::cout << i<<std::bitset<8>(i);
+
+	std::cout << std::endl;
+
+	setResultToInfinity(result);
+
+
+	for (auto i : exponentResult)
+		result.floatNumberBits.push_back(i);
+
+	for (auto i : fracResult)
+		result.floatNumberBits.push_back(i);
 
 	return result;
-
-
 }

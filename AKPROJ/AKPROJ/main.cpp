@@ -16,35 +16,29 @@ int main()
 	//number.displayNumberBinary();
 
 
+	std::vector<int> a{1, 2, 3};
+	std::vector<int> b{4, 5, 6, 7};
+	std::vector<int> c;
+	c.reserve(7);
 
-	std::vector<uint8_t> inc{ 0b00001111, 0b11111111, 0b11111100 };
+	c.insert(c.end(), a.begin(), a.end());
+	c.insert(c.end(), b.begin(), b.end());
 
-	for (auto i : inc)
-		std::cout << std::bitset<8>(i) << " ";
-	std::cout << std::endl;
-
-	number.incSevBytes(inc);
-
-	for (auto i : inc)
-		std::cout << std::bitset<8>(i) << " ";
-	std::cout << std::endl;
-
-
+	for (int i : c)
+	{
+		std::cout << i << " ";
+	}
 
 
 
-
-
-
-
-
-
-	/*
 
 	
-	FloatNumber numberA, numberB;
+
+	
+	FloatNumber numberA, numberB, numberC;
 	numberA.setStandard(s);
 	numberB.setStandard(s);
+	numberC.setStandard(s);
 
 	numberA.dec2float(113.5);
 	numberB.dec2float(113.5);
@@ -54,15 +48,14 @@ int main()
 	std::cout << "numberB: ";
 	numberB.displayNumberBinary();
 
-	std::cout << "**multiply**\n";
-
-	number.multiply(numberA, numberB);
-
 	std::cout << "\noczekiwana\n";
 	number.displayNumberBinary();
 
+	std::cout << "**multiply**\n";
+
+	numberC=numberC.multiply(numberA, numberB);
+	numberC.displayNumberBinary();
 	
-	*/
 
 
 	return 0;

@@ -9,7 +9,7 @@ private:
 	Standard s;
 	bool sign;
 	std::vector<uint8_t> floatNumberBits;							//vector liczby w standardzie
-
+	void setResultToInfinity(FloatNumber& number);
 public:
 
 	void rlc(uint8_t& byte, uint8_t& rotCarry);						//rotacja w lewo z przeniesieniem 
