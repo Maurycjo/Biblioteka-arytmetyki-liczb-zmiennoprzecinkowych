@@ -9,31 +9,18 @@ int main()
 {
 	
 
-	Standard s(1, 2);
+	Standard s(2, 2);
 	FloatNumber number;
 	number.setStandard(s);
 	number.dec2float(float(113.5 * 113.5));
 	//number.displayNumberBinary();
 
 
-	std::vector<int> a{1, 2, 3};
-	std::vector<int> b{4, 5, 6, 7};
-	std::vector<int> c;
-	c.reserve(7);
-
-	c.insert(c.end(), a.begin(), a.end());
-	c.insert(c.end(), b.begin(), b.end());
-
-	for (int i : c)
-	{
-		std::cout << i << " ";
-	}
-
-
-
-
+	
 	
 
+	
+	
 	
 	FloatNumber numberA, numberB, numberC;
 	numberA.setStandard(s);
@@ -55,7 +42,7 @@ int main()
 
 	numberC=numberC.multiply(numberA, numberB);
 	numberC.displayNumberBinary();
-	
+
 
 
 	return 0;
