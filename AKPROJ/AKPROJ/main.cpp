@@ -7,11 +7,29 @@
 
 int main()
 {
+	
+
 	Standard s(1, 2);
 	FloatNumber number;
 	number.setStandard(s);
-	number.dec2float(float(113.5*113.5));
+	number.dec2float(float(113.5 * 113.5));
 	//number.displayNumberBinary();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	
 	FloatNumber numberA, numberB;
@@ -29,9 +47,11 @@ int main()
 	std::cout << "**multiply**\n";
 
 	number.multiply(numberA, numberB);
-	
+
 	std::cout << "\noczekiwana\n";
 	number.displayNumberBinary();
+
+	
 
 
 	return 0;
