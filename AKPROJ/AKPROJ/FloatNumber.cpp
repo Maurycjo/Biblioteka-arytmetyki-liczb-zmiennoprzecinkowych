@@ -365,7 +365,7 @@ void FloatNumber::setResultToInfinity(std::vector<uint8_t> &number)
 		number.push_back(0);
 }
 
-void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
+void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB, Standard::roundType round_type)
 {
 	// M1 *2^E1* M2*2E2=(M1*M2)*2^(E1+E2)
 
@@ -517,7 +517,7 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 	}
 	// incSevBytes(fracResult);
 
-	round(fracResult);
+	round(fracResult, round_type);
 
 	for (auto i : exponentResult)
 		this->floatNumberBits.push_back(i);
@@ -530,39 +530,60 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 	std::cout << "TEST: " << int(fracResult[3]) << std::endl;
 }
 
-void FloatNumber::round(std::vector<uint8_t> &bytes)
+void FloatNumber::round(std::vector<uint8_t> &bytes, Standard::roundType round_type)
 {
-	std::cout << "TEST ZAOKRAGLADANI" << std::endl;
-	std::cout << "ZNAK: " << sign << std::endl;
+	uint8_t carryFromAdd = 0;
 
-	switch (s.getRoundType())
+	switch (round_type)
 	{
-	case Standard::roundType::TO_NEAREST_TIES_AWAY_FROM_ZERO:
-		if (!Rbit && !Sbit)
+	case Standard::roundType::TO_NEAREST_TIES_AWAY_FROM_ZERO: // Zaokraglenie symetrycznie do parzystej
+		if (!Gbit && !Rbit)
 			break;
-		else if (Rbit)
-			incSevBytes(bytes);
+		else if (Gbit)
+
+			for (int i = (s.getFraction() - 1); i >= 0; i--) // Sprawdzam czy po inkrementacji nie zaokraglimy do nieskonczonosci
+			{
+				bytes[i] = addTwoBytes(bytes[i], 1, carryFromAdd);
+				if (carryFromAdd == 0)
+					break;
+			}
+		if (carryFromAdd)
+			setResultToInfinity(bytes);
+
 		break;
-	case Standard::roundType::TO_NEAREST_TIES_TO_EVEN:
-		if (!Rbit && !Sbit)
+	case Standard::roundType::TO_NEAREST_TIES_TO_EVEN:		//zaokraglenie symetryczne do wiekszej wartosci bezwzglednej
+		if (!Gbit && !Rbit)
 			break;
 
 		else
-			incSevBytes(bytes);
+			for (int i = (s.getFraction() - 1); i >= 0; i--) // Sprawdzam czy po inkrementacji nie zaokraglimy do nieskonczonosci
+			{
+				bytes[i] = addTwoBytes(bytes[i], 1, carryFromAdd);
+				if (carryFromAdd == 0)
+					break;
+			}
+		if (carryFromAdd)
+			setResultToInfinity(bytes);
 		break;
 
 	case Standard::roundType::TOWARD_MINUS_INF:
-		if (!Rbit && !Sbit)
+		if (!Gbit && !Rbit)
 			break;
 		else if (sign)
-			incSevBytes(bytes);
+			for (int i = (s.getFraction() - 1); i >= 0; i--) // Sprawdzam czy po inkrementacji nie zaokraglimy do nieskonczonosci
+			{
+				bytes[i] = addTwoBytes(bytes[i], 1, carryFromAdd);
+				if (carryFromAdd == 0)
+					break;
+			}
+		if (carryFromAdd)
+			setResultToInfinity(bytes);
 		else
 			break;
 		break;
 
 	case Standard::roundType::TOWARD_PLUS_INF:
-		std::cout << "WSZEDLEM" << std::endl;
-		if (!Rbit && !Sbit)
+		if (!Gbit && !Rbit)
 		{
 			break;
 		}
@@ -573,7 +594,14 @@ void FloatNumber::round(std::vector<uint8_t> &bytes)
 		}
 		else
 		{
-			incSevBytes(bytes);
+			for (int i = (s.getFraction() - 1); i >= 0; i--) // Sprawdzam czy po inkrementacji nie zaokraglimy do nieskonczonosci
+			{
+				bytes[i] = addTwoBytes(bytes[i], 1, carryFromAdd);
+				if (carryFromAdd == 0)
+					break;
+			}
+			if (carryFromAdd)
+				setResultToInfinity(bytes);
 		}
 
 		break;
@@ -590,18 +618,20 @@ void FloatNumber::get_bit(std::vector<uint8_t> bytes)
 {
 	uint8_t byte = bytes[s.getFraction()];
 
-	Rbit = byte & 0b10000000;
-	Sbit = byte & 0b01000000;
+	Gbit = byte & 0b10000000;
+	Rbit = byte & 0b01000000;
+	Sbit = byte & 0b00100000;
+
 	if (!Sbit)
 	{
-		for (int i = s.getFraction()+1; i < s.getFraction() * 2; i++)
-		{	
+		for (int i = s.getFraction() + 1; i < s.getFraction() * 2; i++)
+		{
 			Sbit = bytes[i];
 			if (Sbit)
 				break;
 		}
 	}
-
+	std::cout << "GBIT: " << Gbit << std::endl;
 	std::cout << "RBIT: " << Rbit << std::endl;
 	std::cout << "SBIT: " << Sbit << std::endl;
 }

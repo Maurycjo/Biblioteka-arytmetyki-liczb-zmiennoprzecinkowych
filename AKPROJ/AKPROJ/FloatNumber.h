@@ -22,14 +22,14 @@ private:
 	void incSevBytes(std::vector<uint8_t>& number);								//inkrementacja bez przeniesienia vektora bajtow
 	void decSevBytes(std::vector<uint8_t>& number);								//dekrementacja bez przeniesienia vektora bajtow
 	std::vector<uint8_t> generateBias();										//generowanie obciazenia wykladnika
-	void round(std::vector<uint8_t>& bytes);
+	void round(std::vector<uint8_t>& bytes, Standard::roundType round_type);
 	void get_bit(std::vector<uint8_t> bytes);
 public:
 
 	void setStandard(Standard s);												//ustawienie standardu
 	void dec2float(float inputNumber);											//konwersja na liczbe FloatNumber
 	void displayNumberBinary();													//wyswietlenie liczby w formacie binarnym	
-	void multiply(FloatNumber number1, FloatNumber number2);				//mnozenie liczb w standardzie
+	void multiply(FloatNumber number1, FloatNumber number2, Standard::roundType round_type);				//mnozenie liczb w standardzie
 	
 };
 

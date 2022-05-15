@@ -33,7 +33,7 @@ void test(double x, double y, Standard::roundType round_type){
 
 	std::cout << "**multiply**\n";
 
-	numberC.multiply(numberA, numberB);
+	numberC.multiply(numberA, numberB,round_type);
 	numberC.displayNumberBinary();
 
 
@@ -41,55 +41,20 @@ void test(double x, double y, Standard::roundType round_type){
 
 int main()
 {
+		/*
+		RS  11  695.12,123.68
+		RS  10
+		RS  01
+		RS  00
+		*/
 
-	/*
-		Liczby do przetestowania zaokraglen:
-		RS 11  3.5
-		RS 10  3
-		RS 01  2.5
-		RS 00  2
-	*/
+	//test(695.12,123.68,Standard::roundType::TO_NEAREST_TIES_AWAY_FROM_ZERO);
+	test(695.12,123.68,Standard::roundType::TO_NEAREST_TIES_TO_EVEN);
+	//test(-695.12,123.68,Standard::roundType::TOWARD_MINUS_INF);
+	//test(695.12,123.68,Standard::roundType::TOWARD_PLUS_INF);
+	//test(695.12,123.68,Standard::roundType::TOWARD_ZERO);
 
-	//RS 00
-	/*
-	std::cout << "=========================" << std::endl;
-	test(1,2,Standard::roundType::TO_NEAREST_TIES_AWAY_FROM_ZERO);
-	std::cout << "=========================" << std::endl;
-	test(1,2,Standard::roundType::TO_NEAREST_TIES_TO_EVEN);
-	std::cout << "=========================" << std::endl;
-	test(1,2,Standard::roundType::TOWARD_MINUS_INF);
-	std::cout << "=========================" << std::endl;
-	test(1,2,Standard::roundType::TOWARD_PLUS_INF);
-	std::cout << "=========================" << std::endl;
-	test(1,2,Standard::roundType::TOWARD_ZERO);
-	std::cout << "=========================" << std::endl;
-	*/
-	
-	//RS 01
-	std::cout << "=========================" << std::endl;
-	test(69.4568,85.5123,Standard::roundType::TO_NEAREST_TIES_AWAY_FROM_ZERO);
-	std::cout << "=========================" << std::endl;
-	test(69.4568,85.5123,Standard::roundType::TO_NEAREST_TIES_TO_EVEN);
-	std::cout << "=========================" << std::endl;
-	test(69.4568,85.5123,Standard::roundType::TOWARD_MINUS_INF);
-	std::cout << "=========================" << std::endl;
-	test(69.4568,85.5123,Standard::roundType::TOWARD_PLUS_INF);
-	std::cout << "=========================" << std::endl;
-	test(69.4568,85.5123,Standard::roundType::TOWARD_ZERO);
-	std::cout << "=========================" << std::endl;	
-	//RS10
-	//test(1,3,Standard::roundType::TO_NEAREST_TIES_AWAY_FROM_ZERO);
-	//test(1,3,Standard::roundType::TO_NEAREST_TIES_TO_EVEN);
-	//test(1,3,Standard::roundType::TOWARD_MINUS_INF);
-	//test(1,3,Standard::roundType::TOWARD_PLUS_INF);
-	//test(1,3,Standard::roundType::TOWARD_ZERO);
 
-	//RS 11
-	//test(1,3.5,Standard::roundType::TO_NEAREST_TIES_AWAY_FROM_ZERO);
-	//test(1,3.5,Standard::roundType::TO_NEAREST_TIES_TO_EVEN);
-	//test(1,3.5,Standard::roundType::TOWARD_MINUS_INF);
-	//test(1,3.5,Standard::roundType::TOWARD_PLUS_INF);
-	//test(1,3.5,Standard::roundType::TOWARD_ZERO);
 
 	/*
 	double testA = 2.0;
