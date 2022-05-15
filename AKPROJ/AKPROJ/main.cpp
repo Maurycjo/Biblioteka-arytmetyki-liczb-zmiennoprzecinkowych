@@ -1,24 +1,30 @@
 #include <iostream>
 #include "FloatNumber.h"
 #include "Standard.h"
-
 #include <bitset>
 #include <bit>
 
 int main()
 {
 
-	double testA =10.1234;
-	double testB = 2552.121244114;
-	
+	double testA = 8.124;
+	double testB = 1234.123;
+	double result = testA * testB;
 
 
 	std::cout << "Program started\n";
 
-	Standard s(1, 5);
+
+	
+
+
+
+	
+	
+	Standard s(1, 2);
 	FloatNumber number;
 	number.setStandard(s);
-	number.dec2float(double(testA*testB));
+	number.dec2float(result);
 	//number.displayNumberBinary();
 
 	
@@ -29,14 +35,16 @@ int main()
 	numberB.setStandard(s);
 	numberC.setStandard(s);
 
-	numberA.dec2float(testA);
-	numberB.dec2float(testB);
+	std::cout << "numberA\n";
+	numberA.dec2float_2(testA);
+	std::cout << "numberB\n";
+	//numberB.dec2float(testA);
 
-	std::cout << "numberA: ";
+	std::cout << "numberNew: ";
 	numberA.displayNumberBinary();
-	std::cout << "numberB: ";
-	numberB.displayNumberBinary();
-
+	std::cout << "numberOld: ";
+	//numberB.displayNumberBinary();
+	/*
 	std::cout << "\noczekiwana\n";
 	number.displayNumberBinary();
 
@@ -44,7 +52,7 @@ int main()
 
 	numberC.multiply(numberA, numberB);
 	numberC.displayNumberBinary();
-
+	*/
 
 
 	return 0;
