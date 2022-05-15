@@ -12,6 +12,9 @@ void FloatNumber::setStandard(Standard s)
 
 void FloatNumber::dec2float_2(double inputNumber)
 {
+	std::cout << inputNumber;
+	std::cout << "v2\n";
+
 	if (inputNumber == 0)
 	{
 		this->setResultToZero();
@@ -23,9 +26,8 @@ void FloatNumber::dec2float_2(double inputNumber)
 	std::vector<uint8_t> expTab = generateBias();
 	expTab.insert(expTab.begin(), 0);
 	uint8_t carryFromAdd = 0, carryFromRot = 0, carryFromSubb = 0;
-	int decPlace = 0;
+	bool denormalized = false;
 	
-
 	if (inputNumber < 0)
 	{
 		this->sign = 1;		//liczba ujemna
@@ -34,54 +36,107 @@ void FloatNumber::dec2float_2(double inputNumber)
 	else
 		this->sign = 0;		//liczba dodatnia
 
-
-
-
-	long long integerPart = inputNumber;					//czesc calkowita liczby
-	double afterTheDecPoint = inputNumber - integerPart;	//czesc przecinkowa liczby
-
-
-	if (afterTheDecPoint != 0 && integerPart != 0)
-	{
-		while (inputNumber < (s.getFraction() * 8 - 1))
-		{
-			inputNumber <<= 1;
-			std::cout << inputNumber << "\n";
-			decSevBytes(expTab);
-		}
-		integerPart = inputNumber;
-	}
-
-	
-
+	long long int integerPart = floor(inputNumber);					//czesc calkowita liczby
+	long double afterTheDecPoint = inputNumber - integerPart;	//czesc przecinkowa liczby
 	long long tempNumber = integerPart;
-	while (tempNumber > 0 && expTab[0] < 1)
+	bool isInfinity;
+
+	if (integerPart > 0)
 	{
-		
-		carryFromRot = 0;
-		if (tempNumber % 2 == 1)
+		//wyluskanie bitow mnoznika
+		if (afterTheDecPoint != 0)
 		{
-			fracTab[0] += 0b10000000;
+			while (integerPart< (pow(2, ((s.getFraction() * 8) - 1))) && afterTheDecPoint>0)
+			{
+				integerPart <<= 1;
+				afterTheDecPoint *= 2;
+			
+				if (afterTheDecPoint >= 1)
+				{
+					integerPart++;
+					afterTheDecPoint -= 1;
+				}
+				decSevBytes(expTab);
+			}
+			tempNumber = integerPart;
 		}
-		tempNumber /= 2;
+
+		//kodowanie bitow mnoznika
+		while (tempNumber > 0 )
+		{
+			carryFromRot = 0;
+			if (tempNumber % 2 == 1)
+			{
+				fracTab[0]+=0b10000000;
+			}
+			tempNumber /= 2;
 		
-		incSevBytes(expTab);
+			incSevBytes(expTab);
+			rrcSevBytes(fracTab, carryFromRot);
+
+			if (expTab[0]==1)
+			{
+				this->setResultToInfinity();
+				return;
+			}
+		}
+		decSevBytes(expTab);
+
+
+		carryFromRot = 0;
+		rlcSevBytes(fracTab, carryFromRot);
+		carryFromRot = 0;
+		rlcSevBytes(fracTab, carryFromRot);
+
+	}
+	else
+	{
+
+		while (afterTheDecPoint<1 && !denormalized)
+		{
+
+			afterTheDecPoint *= 2;
+			decSevBytes(expTab);
+
+			denormalized = true;
+			for (auto i : expTab)
+			{
+				if (i > 0)
+				{
+					denormalized = false;
+					break;
+				}
+			}
+		}
+		
+		if (!denormalized)
+			afterTheDecPoint--;
+			
+		for (int i = 0; i < (s.getFraction()+1) * 8 ; i++)
+		{
+			afterTheDecPoint *= 2;
+			if (afterTheDecPoint > 1)
+			{
+				fracTab[s.getFraction()] += 1;
+				afterTheDecPoint--;
+			}
+			carryFromRot = 0;
+			rlcSevBytes(fracTab, carryFromRot);
+
+		}
+		carryFromRot = 0;
 		rrcSevBytes(fracTab, carryFromRot);
+
+		
 	}
 
 
-	decSevBytes(expTab);
-
-	carryFromRot = 0;
-	rlcSevBytes(fracTab, carryFromRot);
-	carryFromRot = 0;
-	rlcSevBytes(fracTab, carryFromRot);
+	if (denormalized)
+		std::cout << "liczba zdenormalizowana!\n";
 
 
 	expTab.erase(expTab.begin());
 	fracTab.pop_back();
-
-
 
 	this->floatNumberBits.reserve(expTab.size() + fracTab.size());
 	this->floatNumberBits.insert(floatNumberBits.end(), expTab.begin(), expTab.end());
@@ -453,6 +508,8 @@ void FloatNumber::setResultToInfinity()
 
 	for (int i = 0; i < s.getFraction(); i++)
 		this->floatNumberBits.push_back(0);
+
+	std::cout << "INFINITY\n";
 }
 
 void FloatNumber::setResultToZero()
@@ -643,6 +700,7 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 	{
 		while (fracResult[0] != 1)
 		{
+
 			rrcSevBytes(fracResult, carryFromRr);
 			incSevBytes(exponentResult);
 		}

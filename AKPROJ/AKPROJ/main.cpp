@@ -7,11 +7,11 @@
 int main()
 {
 
-	double testA = 8.124;
+	double testA = 9999999.99999999999999999999999999;
 	double testB = 1234.123;
 	double result = testA * testB;
-
-
+	
+	
 	std::cout << "Program started\n";
 
 
@@ -21,10 +21,10 @@ int main()
 
 	
 	
-	Standard s(1, 2);
-	FloatNumber number;
-	number.setStandard(s);
-	number.dec2float(result);
+	Standard s(1, 3);
+	//FloatNumber number;
+	//number.setStandard(s);
+	//number.dec2float(result);
 	//number.displayNumberBinary();
 
 	
@@ -37,13 +37,15 @@ int main()
 
 	std::cout << "numberA\n";
 	numberA.dec2float_2(testA);
-	std::cout << "numberB\n";
-	//numberB.dec2float(testA);
 
 	std::cout << "numberNew: ";
 	numberA.displayNumberBinary();
+
+	std::cout << "numberB\n";
+	numberB.dec2float(testA);
+
 	std::cout << "numberOld: ";
-	//numberB.displayNumberBinary();
+	numberB.displayNumberBinary();
 	/*
 	std::cout << "\noczekiwana\n";
 	number.displayNumberBinary();
