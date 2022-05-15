@@ -8,6 +8,9 @@ class FloatNumber
 private:
 	Standard s;
 	bool sign;
+	bool Rbit;
+	bool Sbit;
+	bool Gbit;
 	std::vector<uint8_t> floatNumberBits;										//vector liczby w standardzie
 	void setResultToInfinity(std::vector<uint8_t>& number);								//ustawienie liczby w standardzie na nieskonczonosc
 	uint8_t addTwoBytes(uint8_t byteA, uint8_t byteB, uint8_t& carry);			// dodanie dwoch bajtow z wykrywaniemm przeniesienia
@@ -19,6 +22,8 @@ private:
 	void incSevBytes(std::vector<uint8_t>& number);								//inkrementacja bez przeniesienia vektora bajtow
 	void decSevBytes(std::vector<uint8_t>& number);								//dekrementacja bez przeniesienia vektora bajtow
 	std::vector<uint8_t> generateBias();										//generowanie obciazenia wykladnika
+	void round(std::vector<uint8_t>& bytes);
+	void get_bit(std::vector<uint8_t> bytes);
 public:
 
 	void setStandard(Standard s);												//ustawienie standardu
