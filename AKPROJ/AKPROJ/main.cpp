@@ -8,20 +8,20 @@
 int main()
 {
 
-	double testA =16.123;
-	double testB = 4231.14;
+	double testA =10.1234;
+	double testB = 2552.121244114;
 	
 
 
-	std::cout << "*\n";
+	std::cout << "Program started\n";
 
-	Standard s(1, 2);
+	Standard s(1, 5);
 	FloatNumber number;
 	number.setStandard(s);
 	number.dec2float(double(testA*testB));
 	//number.displayNumberBinary();
 
-
+	
 
 	
 	FloatNumber numberA, numberB, numberC;

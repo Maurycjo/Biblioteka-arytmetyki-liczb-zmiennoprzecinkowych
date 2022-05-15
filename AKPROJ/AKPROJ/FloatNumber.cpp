@@ -1,7 +1,6 @@
 #include "FloatNumber.h"
 #include <iostream>
 #include <math.h>
-#include <format>
 #include <cassert>
 #include <cmath>
 #include <iomanip>
@@ -355,8 +354,6 @@ void FloatNumber::decSevBytes(std::vector<uint8_t>& number)
 	}
 }
 
-
-
 std::vector<uint8_t> FloatNumber::generateBias()
 {
 	std::vector<uint8_t> bias{ 0b01111111 };
@@ -368,19 +365,30 @@ std::vector<uint8_t> FloatNumber::generateBias()
 	return bias;
 }
 
-
-
-void FloatNumber::setResultToInfinity(std::vector<uint8_t>& number)
+void FloatNumber::setResultToInfinity()
 {
 	
 	for (int i = 0; i < s.getExponent(); i++)
-		number.push_back(255);
+		this->floatNumberBits.push_back(255);
 	
 
 	for (int i = 0; i < s.getFraction(); i++)
-		number.push_back(0);
+		this->floatNumberBits.push_back(0);
+}
+
+void FloatNumber::setResultToZero()
+{
+
+	for (int i = 0; i < s.getExponent(); i++)
+		this->floatNumberBits.push_back(0);
+	
+
+	for (int i = 0; i < s.getFraction(); i++)
+		this->floatNumberBits.push_back(0);
 
 }
+
+
 
 
 void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
@@ -389,6 +397,37 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 
 	setStandard(numberA.s);
 	
+
+
+	//sprawdzenie czy iloraz bedzie zerem
+	bool isZero = true;
+
+	for (auto i : numberA.floatNumberBits)
+	{
+		if (i != 0)
+		{
+			isZero = false;
+			break;
+		}
+	}
+
+	if(!isZero)
+	for (auto i : numberB.floatNumberBits)
+	{
+
+		if (i != 0)
+		{
+			isZero = false;
+			break;
+		}
+	}
+
+	if (isZero)
+	{
+		this->setResultToZero();
+		this->sign = false;
+		return;
+	}
 
 	//sprawdzenie znaku ilorazu
 	bool resultSign = true;
@@ -401,6 +440,8 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 		resultSign = false;
 	}
 	this->sign = resultSign;
+
+
 
 	//mnozniki
 	std::vector<uint8_t> fracA;
@@ -441,7 +482,7 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 	if (exponentResult[0] > 0)
 	{
 		std::cout << "infinity\n";
-		setResultToInfinity(this->floatNumberBits);
+		setResultToInfinity();
 		return;
 	}
 
@@ -516,7 +557,7 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 
 	if (ifInfinity)
 	{
-		setResultToInfinity(this->floatNumberBits);
+		setResultToInfinity();
 		return;
 	}
 

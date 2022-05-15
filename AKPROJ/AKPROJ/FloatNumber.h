@@ -7,9 +7,10 @@ class FloatNumber
 {
 private:
 	Standard s;
-	bool sign;
+	bool sign, bitG, bitR, bitS;
 	std::vector<uint8_t> floatNumberBits;										//vector liczby w standardzie
-	void setResultToInfinity(std::vector<uint8_t>& number);								//ustawienie liczby w standardzie na nieskonczonosc
+	void setResultToInfinity();													//ustawienie liczby w standardzie na nieskonczonosc
+	void setResultToZero();														//ustawienie liczby w standardzie na 0
 	uint8_t addTwoBytes(uint8_t byteA, uint8_t byteB, uint8_t& carry);			// dodanie dwoch bajtow z wykrywaniemm przeniesienia
 	uint8_t subbTwoBytes(uint8_t minuend, uint8_t subtrahend, uint8_t& carry);	//odejmowanie dwoch bajtow
 	void rlc(uint8_t& byte, uint8_t& rotCarry);									//rotacja w lewo z przeniesieniem 
