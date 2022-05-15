@@ -27,8 +27,8 @@ private:
 public:
 
 	void setStandard(Standard s);												//ustawienie standardu
+	void dec2float_old(double inputNumber);											//konwersja na liczbe FloatNumber
 	void dec2float(double inputNumber);											//konwersja na liczbe FloatNumber
-	void dec2float_2(double inputNumber);											//konwersja na liczbe FloatNumber
 	void displayNumberBinary();													//wyswietlenie liczby w formacie binarnym	
 	void multiply(FloatNumber number1, FloatNumber number2);				//mnozenie liczb w standardzie
 	

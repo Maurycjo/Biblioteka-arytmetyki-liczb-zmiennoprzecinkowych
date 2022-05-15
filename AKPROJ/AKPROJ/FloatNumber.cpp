@@ -10,11 +10,9 @@ void FloatNumber::setStandard(Standard s)
 
 }
 
-void FloatNumber::dec2float_2(double inputNumber)
+void FloatNumber::dec2float(double inputNumber)
 {
-	std::cout << inputNumber;
-	std::cout << "v2\n";
-
+	
 	if (inputNumber == 0)
 	{
 		this->setResultToZero();
@@ -81,8 +79,6 @@ void FloatNumber::dec2float_2(double inputNumber)
 			}
 		}
 		decSevBytes(expTab);
-
-
 		carryFromRot = 0;
 		rlcSevBytes(fracTab, carryFromRot);
 		carryFromRot = 0;
@@ -91,7 +87,7 @@ void FloatNumber::dec2float_2(double inputNumber)
 	}
 	else
 	{
-
+		
 		while (afterTheDecPoint<1 && !denormalized)
 		{
 
@@ -122,18 +118,10 @@ void FloatNumber::dec2float_2(double inputNumber)
 			}
 			carryFromRot = 0;
 			rlcSevBytes(fracTab, carryFromRot);
-
 		}
 		carryFromRot = 0;
 		rrcSevBytes(fracTab, carryFromRot);
-
-		
 	}
-
-
-	if (denormalized)
-		std::cout << "liczba zdenormalizowana!\n";
-
 
 	expTab.erase(expTab.begin());
 	fracTab.pop_back();
@@ -145,8 +133,7 @@ void FloatNumber::dec2float_2(double inputNumber)
 
 }
 
-
-void FloatNumber::dec2float(double inputNumber)
+void FloatNumber::dec2float_old(double inputNumber)
 {
 
 	//zero
@@ -619,8 +606,8 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 	std::vector<uint8_t> fracA;
 	std::vector<uint8_t> fracB;
 	std::vector<uint8_t> fracResult(s.getFraction() * 2+1, 0);		//inicjalizacja zerami
-	fracA.reserve(s.getExponent());
-	fracB.reserve(s.getExponent());	
+	fracA.reserve(s.getFraction());
+	fracB.reserve(s.getFraction());	
 	fracA.insert(fracA.begin(), numberA.floatNumberBits.begin() + s.getExponent(), numberA.floatNumberBits.end());
 	fracB.insert(fracB.begin(), numberB.floatNumberBits.begin() + s.getExponent(), numberB.floatNumberBits.end());
 	//wykladniki
@@ -700,7 +687,7 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 	{
 		while (fracResult[0] != 1)
 		{
-
+			carryFromRl = 0;
 			rrcSevBytes(fracResult, carryFromRr);
 			incSevBytes(exponentResult);
 		}
@@ -711,7 +698,7 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 
 		while (fracResult[0] != 1 && ifInfinity == false)
 		{
-
+			carryFromRl = 0;
 			rlcSevBytes(fracResult, carryFromRl);
 			decSevBytes(exponentResult);
 
@@ -725,7 +712,6 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 				}
 			}
 		}
-
 	}
 
 	if (ifInfinity)
@@ -740,10 +726,8 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 	tu bedzie wywolanie metedy zaokraglajacej GRS
 	*/
 
-
 	fracResult.erase(fracResult.begin());
 
-	
 	while (fracResult.size() != s.getFraction())
 	{
 		fracResult.pop_back();

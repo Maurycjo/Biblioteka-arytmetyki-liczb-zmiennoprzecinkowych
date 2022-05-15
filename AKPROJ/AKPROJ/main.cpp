@@ -7,8 +7,8 @@
 int main()
 {
 
-	double testA = 9999999.99999999999999999999999999;
-	double testB = 1234.123;
+	double testA = 9123424323999.9900129;
+	double testB = 0.000000000121243;
 	double result = testA * testB;
 	
 	
@@ -30,31 +30,31 @@ int main()
 	
 
 	
-	FloatNumber numberA, numberB, numberC;
+	FloatNumber numberA, numberB, numberC, numberD;
 	numberA.setStandard(s);
 	numberB.setStandard(s);
 	numberC.setStandard(s);
+	numberD.setStandard(s);
+
+	numberC.dec2float(result);
+
 
 	std::cout << "numberA\n";
-	numberA.dec2float_2(testA);
-
-	std::cout << "numberNew: ";
+	numberA.dec2float(testA);
 	numberA.displayNumberBinary();
 
 	std::cout << "numberB\n";
-	numberB.dec2float(testA);
-
-	std::cout << "numberOld: ";
+	numberB.dec2float(testB);
 	numberB.displayNumberBinary();
-	/*
+
 	std::cout << "\noczekiwana\n";
-	number.displayNumberBinary();
+	numberC.displayNumberBinary();
 
 	std::cout << "**multiply**\n";
 
-	numberC.multiply(numberA, numberB);
-	numberC.displayNumberBinary();
-	*/
+	numberD.multiply(numberA, numberB);
+	numberD.displayNumberBinary();
+	
 
 
 	return 0;
