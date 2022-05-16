@@ -23,13 +23,15 @@ private:
 	void decSevBytes(std::vector<uint8_t>& number);								//dekrementacja bez przeniesienia vektora bajtow
 	std::vector<uint8_t> generateBias();										//generowanie obciazenia wykladnika
 	void round(std::vector<uint8_t>& bytes, Standard::roundType round_type);
-	void get_bit(std::vector<uint8_t> bytes);
+	void getGRS(std::vector<uint8_t> bytes);
+	void prepGRS(std::vector<uint8_t>& bytes);									//Przygotowuje bity GRS do obliczen
 public:
 
 	void setStandard(Standard s);												//ustawienie standardu
 	void dec2float(float inputNumber);											//konwersja na liczbe FloatNumber
 	void displayNumberBinary();													//wyswietlenie liczby w formacie binarnym	
 	void multiply(FloatNumber number1, FloatNumber number2, Standard::roundType round_type);				//mnozenie liczb w standardzie
+	void addition(FloatNumber number1, FloatNumber number2, Standard::roundType round_type);				//dodawanie liczb w standardzie
 	
 };
 

@@ -503,7 +503,7 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB, Standard::r
 	/*
 	tu bedzie wywolanie metedy zaokraglajacej GRS
 	*/
-	get_bit(fracResult);
+	getGRS(fracResult);
 	// TODO tutaj
 
 	for (auto i : fracResult) // TODO DO USUNIECIA
@@ -530,6 +530,109 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB, Standard::r
 	std::cout << "TEST: " << int(fracResult[3]) << std::endl;
 }
 
+void FloatNumber::addition(FloatNumber numberA, FloatNumber numberB, Standard::roundType round_type)
+{
+
+	setStandard(numberA.s);
+	// mnozniki
+	std::vector<uint8_t> fracA;
+	std::vector<uint8_t> fracB;
+	std::vector<uint8_t> fractResult(s.getFraction()+1,0);
+	fracA.reserve(s.getFraction());
+	fracB.reserve(s.getFraction());
+	fracA.insert(fracA.begin(), numberA.floatNumberBits.begin() + s.getExponent(), numberA.floatNumberBits.end());
+	fracB.insert(fracB.begin(), numberB.floatNumberBits.begin() + s.getExponent(), numberB.floatNumberBits.end());
+
+	// wykladniki
+	std::vector<uint8_t> exponentA;
+	std::vector<uint8_t> exponentB;
+	std::vector<uint8_t> exponentBias;
+	std::vector<uint8_t> exponentDiff(s.getExponent(), 0);
+	
+	exponentA.reserve(s.getExponent());
+	exponentB.reserve(s.getExponent());
+	exponentA.insert(exponentA.begin(), numberA.floatNumberBits.begin(), numberA.floatNumberBits.begin() + s.getExponent());
+	exponentB.insert(exponentB.begin(), numberB.floatNumberBits.begin(), numberB.floatNumberBits.begin() + s.getExponent());
+	exponentBias = generateBias();
+
+	uint8_t carryFromSub = 0, carryFromRr = 0, carryFromAdd=0;
+
+	for (int i = 0; i < s.getExponent(); i++) // Sprawdz ktory wykladnik jest wiekszy
+	{
+		if (exponentA[i] > exponentB[i])
+		{
+			for (int i = (s.getExponent() - 1); i >= 0; i--)
+			{
+				exponentDiff[i] = subbTwoBytes(exponentA[i], exponentB[i], carryFromSub);
+			}
+
+			for (int i = 0; i < s.getFraction(); i++)
+			{
+				fracB.insert(fracB.end(), 0);
+			}
+
+			while (exponentDiff[0] != 0)
+			{
+				carryFromRr = 0;
+				rrcSevBytes(fracB, carryFromRr);
+				decSevBytes(exponentDiff);
+			}
+		}
+		else if (exponentA[i] < exponentB[i])
+		{
+			for (int i = (s.getExponent() - 1); i >= 0; i--)
+			{
+				exponentDiff[i] = subbTwoBytes(exponentB[i], exponentA[i], carryFromSub);
+			}
+
+			for (int i = 0; i < s.getFraction(); i++)
+			{
+				fracA.insert(fracA.end(), 0); // do przeskalowywania tej liczby potrzebne dwa razy wiecej bajtow
+			}
+
+			while (exponentDiff[0] != 0)
+			{
+				carryFromRr = 0;
+				rrcSevBytes(fracA, carryFromRr);
+				decSevBytes(exponentDiff);
+			}
+		}
+		else
+		{
+			break;
+		}
+		std::cout << "A: " << int(exponentA[i]) << " B: " << int(exponentB[i]) << std::endl;
+		for (int i = 0; i < s.getFraction() + 2; i++)
+		{
+			std::cout << "Skalowanie : " << int(fracB[i]) << std::endl;
+		}
+	}
+
+	if (numberA.sign == 0 && numberB.sign == 0)
+	{ // obie liczby sa dodatnie
+		numberA.getGRS(fracA);
+		numberB.getGRS(fracB);
+		numberA.prepGRS(fracA);
+		numberB.prepGRS(fracB);
+
+		std::cout << "A GRS: " << numberA.Gbit << numberA.Rbit << numberA.Sbit << std::endl;
+		std::cout << "B GRS: " << numberB.Gbit << numberB.Rbit << numberB.Sbit << std::endl;
+		std::cout << "Ostatni bajt: " << int(fracB[2]) << std::endl;
+
+		for (int i = (s.getFraction()); i >= 0; i--)
+		{
+			fractResult[i + 1] = addTwoBytes(exponentA[i], exponentB[i], carryFromAdd);
+		}
+	}
+	/*
+	1. Sprawdz znaki i wybierz tryb
+	2. Przeskaluj wykładnik
+		a) Znajdz mniejszy wykladnik
+		b) Zmien go na rowny wiekszemu - przesun mnoznik w lewo
+	3.
+	*/
+}
+
 void FloatNumber::round(std::vector<uint8_t> &bytes, Standard::roundType round_type)
 {
 	uint8_t carryFromAdd = 0;
@@ -551,7 +654,7 @@ void FloatNumber::round(std::vector<uint8_t> &bytes, Standard::roundType round_t
 			setResultToInfinity(bytes);
 
 		break;
-	case Standard::roundType::TO_NEAREST_TIES_TO_EVEN:		//zaokraglenie symetryczne do wiekszej wartosci bezwzglednej
+	case Standard::roundType::TO_NEAREST_TIES_TO_EVEN: // zaokraglenie symetryczne do wiekszej wartosci bezwzglednej
 		if (!Gbit && !Rbit)
 			break;
 
@@ -614,7 +717,7 @@ void FloatNumber::round(std::vector<uint8_t> &bytes, Standard::roundType round_t
 	}
 }
 
-void FloatNumber::get_bit(std::vector<uint8_t> bytes)
+void FloatNumber::getGRS(std::vector<uint8_t> bytes)
 {
 	uint8_t byte = bytes[s.getFraction()];
 
@@ -634,4 +737,24 @@ void FloatNumber::get_bit(std::vector<uint8_t> bytes)
 	std::cout << "GBIT: " << Gbit << std::endl;
 	std::cout << "RBIT: " << Rbit << std::endl;
 	std::cout << "SBIT: " << Sbit << std::endl;
+}
+
+void FloatNumber::prepGRS(std::vector<uint8_t> &bytes)
+{
+
+	while (bytes.size() != s.getFraction() + 1) // zostawiam ostatni bajt zeby przechowac w nim GRS
+	{
+		bytes.pop_back();
+	}
+	uint8_t byte = bytes[s.getFraction()];
+	byte = 0b00000000;
+
+	if (Gbit)
+		byte = byte | 0b10000000;
+	if (Rbit)
+		byte = byte | 0b01000000;
+	if (Sbit)
+		byte = byte | 0b00100000;
+
+	bytes[s.getFraction()] = byte;
 }
