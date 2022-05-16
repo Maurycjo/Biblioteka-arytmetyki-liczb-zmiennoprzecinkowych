@@ -1,13 +1,15 @@
 #pragma once
 #include "Standard.h"
-#include <iterator>
-#include <iostream>
+#include "roundType.h"
 #include <vector>
+
+
 class FloatNumber
 {
 private:
 	Standard s;
-	bool sign, bitG, bitR, bitS;
+	bool sign;
+	bool bitR = 0, bitS = 0;
 	std::vector<uint8_t> floatNumberBits;										//vector liczby w standardzie
 	void setResultToInfinity();													//ustawienie liczby w standardzie na nieskonczonosc
 	void setResultToZero();														//ustawienie liczby w standardzie na 0
@@ -24,13 +26,16 @@ private:
 	void incSevBytes(std::vector<uint8_t>& number);								//inkrementacja bez przeniesienia vektora bajtow
 	void decSevBytes(std::vector<uint8_t>& number);								//dekrementacja bez przeniesienia vektora bajtow
 	std::vector<uint8_t> generateBias();										//generowanie obciazenia wykladnika
+	
 public:
-
+	void clearBitsToRound();
 	void setStandard(Standard s);												//ustawienie standardu
-	void dec2float_old(double inputNumber);											//konwersja na liczbe FloatNumber
+	void dec2float_alpha(double inputNumber);									//konwersja na liczbe FloatNumber
 	void dec2float(double inputNumber);											//konwersja na liczbe FloatNumber
 	void displayNumberBinary();													//wyswietlenie liczby w formacie binarnym	
-	void multiply(FloatNumber number1, FloatNumber number2);				//mnozenie liczb w standardzie
-	
+	void multiply(FloatNumber number1, FloatNumber number2);					//mnozenie liczb w standardzie
+	void round(RoundType currentRound=RoundType::TOWARD_ZERO);											//zaokraglanie liczby
+	void round();																//zaokraglanie liczby jako wartosc domyslna do 0
+	void setBitToRound(bool bitR, bool bitS);
 };
 

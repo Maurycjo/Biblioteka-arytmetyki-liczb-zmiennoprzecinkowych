@@ -1,8 +1,11 @@
-#include "FloatNumber.h"
 #include <iostream>
 #include <math.h>
 #include <cmath>
 #include <bitset>
+
+
+#include "FloatNumber.h"
+
 
 void FloatNumber::setStandard(Standard s)
 {
@@ -133,7 +136,7 @@ void FloatNumber::dec2float(double inputNumber)
 
 }
 
-void FloatNumber::dec2float_old(double inputNumber)
+void FloatNumber::dec2float_alpha(double inputNumber)
 {
 
 	//zero
@@ -560,6 +563,93 @@ bool FloatNumber::ifNaN(FloatNumber number)
 
 	return true;
 }
+
+
+
+void FloatNumber::setBitToRound(bool bitR, bool bitS)
+{
+
+	this->bitR = bitR;
+	this->bitS = bitS;
+}
+
+void FloatNumber::clearBitsToRound()
+{
+
+	this->bitR = 0;
+	this->bitS = 0;
+}
+
+
+
+void FloatNumber::round(RoundType currentRound)
+{
+
+	
+	//fracTab.insert(fracTab.begin(), this->floatNumberBits.begin() + s.getExponent(), this->floatNumberBits.end());
+	
+	bool bitR, bitS;
+
+
+
+
+	switch (currentRound)
+	{
+		case RoundType::TOWARD_ZERO:
+		{
+
+			clearBitsToRound();
+			return;
+
+
+		}
+		case RoundType::TOWARD_PLUS_INF:
+		{
+
+			if (this->sign == true)
+			{
+				clearBitsToRound();
+				return;
+			}
+			else
+			{
+				incSevBytes(this->floatNumberBits);
+			}
+
+		}
+		case RoundType::TOWARD_MINUS_INF:
+		{
+			if (this->sign == false)
+			{
+				clearBitsToRound();
+				return;
+			}
+			else
+			{
+				incSevBytes(this->floatNumberBits);
+				
+			}
+
+
+		}
+		case RoundType::TO_NEAREST_TIES_TO_EVEN:
+		{
+
+
+
+		}
+		case RoundType::TO_NEAREST_TIES_AWAY_FROM_ZERO:
+		{
+
+
+
+		}
+
+	}
+
+
+}
+
 
 
 void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
