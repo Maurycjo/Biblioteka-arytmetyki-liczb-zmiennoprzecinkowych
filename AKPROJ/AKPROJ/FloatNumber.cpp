@@ -506,10 +506,14 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB, Standard::r
 	getGRS(fracResult);
 	// TODO tutaj
 
+	std::cout<<"Wszystkie otrzymane bity: "<<std::endl;
+	std::cout<< "	    " ;
 	for (auto i : fracResult) // TODO DO USUNIECIA
 	{
-		std::cout << int(i) << std::endl;
+		
+		std::cout << std::bitset<8>(i) << " ";
 	}
+	std::cout<<std::endl;
 
 	while (fracResult.size() != s.getFraction())
 	{
@@ -527,7 +531,7 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB, Standard::r
 		this->floatNumberBits.push_back(i);
 	}
 
-	std::cout << "TEST: " << int(fracResult[3]) << std::endl;
+	
 }
 
 void FloatNumber::addition(FloatNumber numberA, FloatNumber numberB, Standard::roundType round_type)
@@ -734,9 +738,7 @@ void FloatNumber::getGRS(std::vector<uint8_t> bytes)
 				break;
 		}
 	}
-	std::cout << "GBIT: " << Gbit << std::endl;
-	std::cout << "RBIT: " << Rbit << std::endl;
-	std::cout << "SBIT: " << Sbit << std::endl;
+	
 }
 
 void FloatNumber::prepGRS(std::vector<uint8_t> &bytes)
