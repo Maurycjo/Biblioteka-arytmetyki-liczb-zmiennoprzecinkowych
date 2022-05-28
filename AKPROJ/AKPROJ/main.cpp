@@ -8,25 +8,27 @@
 int main()
 {
 
-	ConsoleApp consoleApp;
+	std::string liczba = "0|10100000 |1110000|||1";
+	Standard s(1, 1);
+
+	FloatNumber stringNumber;
+	stringNumber.setStandard(s);
+	//std::cout << "podaj\n";
+	//std::cin >> liczba;
+	if (stringNumber.string2float(liczba))
+		stringNumber.displayNumberBinary();
+	else
+		std::cout << "false";
 
 
 
 
 
-
-
-
-
-
-
-
-
-
+	//ConsoleApp consoleApp;
 
 	/*
-	long double testA = 1234.123;
-	long double testB = 1.12;
+	long double testA = 1230.17723;
+	long double testB = 1455.12999995;
 	long double result = long double(testA / testB);
 	std::cout.precision(20);
 	std::cout << long double(result) << std::endl;

@@ -2,7 +2,7 @@
 #include <math.h>
 #include <cmath>
 #include <bitset>
-
+#include <string>
 
 #include "FloatNumber.h"
 
@@ -325,6 +325,69 @@ void FloatNumber::dec2float_alpha(double inputNumber)
 	if(denormalized)
 	std::cout << "\ndenormalized"<< std::endl;
 	
+}
+
+bool FloatNumber::string2float(std::string inputNumber)
+{
+
+	uint8_t carry = 0;
+
+	if (inputNumber[0] == '0')
+	{
+		this->sign = false;
+	}
+	else if (inputNumber[0] == '1')
+	{
+		this->sign = true;
+	}
+
+	for (int i = 0; i < (s.getExponent()) + (s.getFraction()); i++)
+	{
+		this->floatNumberBits.push_back(0);
+	}
+
+	int x = 1;
+	for (int i = 1; i <=floatNumberBits.size()*8; i++)
+	{
+
+		if (inputNumber[x] == '\0')
+		{
+			for (int j = i; j <= floatNumberBits.size()*8; j++)
+			{
+				carry = 0;
+				rlcSevBytes(floatNumberBits, carry);
+
+			}
+
+			return true;
+		}
+
+		
+		if (inputNumber[x] == '1')
+		{
+			carry = 0;
+			rlcSevBytes(floatNumberBits, carry);
+			incSevBytes(floatNumberBits);
+		}
+		else if (inputNumber[x] == '0')
+		{
+
+			carry = 0;
+			rlcSevBytes(floatNumberBits, carry);
+		}
+		else if (inputNumber[x] == '|' || inputNumber[x] == ' ')
+		{
+			i--;
+
+		}
+		else if (inputNumber[x] != '1' && inputNumber[x] != '0')
+		{
+			return false;
+		}
+		x++;
+	}
+
+	return true;
 }
 
 void FloatNumber::displayNumberBinary()
@@ -740,7 +803,6 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 
 }
 
-
 void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident=dzielna, divisor=dzielnik
 {
 	// M1/M2*2^(E1-E2)
@@ -848,13 +910,12 @@ void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident
 	//mnozniki
 	std::vector<uint8_t> fracDivident;		//mnoznik dzielnej
 	std::vector<uint8_t> fracDivisor;		//mnoznik dzielnika 
-	std::vector<uint8_t> fracQuotient(s.getFraction());		//mnoznik ilorazu inicjalizacja zerami, dodaktkowy bajt na bit ukryty
+	std::vector<uint8_t> fracQuotient(s.getFraction()+1);
 
 	fracDivident.reserve(s.getFraction());
 	fracDivisor.reserve(s.getFraction());
 	fracDivident.insert(fracDivident.begin(), divident.floatNumberBits.begin() + s.getExponent(), divident.floatNumberBits.end());
 	fracDivisor.insert(fracDivisor.begin(), divisor.floatNumberBits.begin() + s.getExponent(), divisor.floatNumberBits.end());
-
 	fracDivisor.insert(fracDivisor.begin(), 1);		//bajt z bitem ukrytym
 	fracDivident.insert(fracDivident.begin(), 1);
 
@@ -864,22 +925,6 @@ void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident
 		fracDivisor.push_back(0);
 		fracDivident.push_back(0);
 	}
-
-	
-	for (auto x : fracDivident)
-		std::cout << std::bitset<8>(x) << " ";
-	std::cout << std::endl;
-	for (auto x : fracDivisor)
-		std::cout << std::bitset<8>(x) << " ";
-	std::cout << std::endl;
-	for (auto x : fracQuotient)
-		std::cout << std::bitset<8>(x) << " ";
-	std::cout << std::endl;
-	std::cout << std::endl;
-
-	
-	
-
 	//wytworzenie bitu ukrytego
 	carry = 0;
 	for (int i = (s.getExponent())*2; i >=0; i--)
@@ -893,30 +938,12 @@ void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident
 	else
 	{
 		incSevBytes(fracQuotient);
-		
 	}
-
-	for (auto x : fracDivident)
-		std::cout << std::bitset<8>(x) << " ";
-	std::cout << std::endl;
-	for (auto x : fracDivisor)
-		std::cout << std::bitset<8>(x) << " ";
-	std::cout << std::endl;
-	for (auto x : fracQuotient)
-		std::cout << std::bitset<8>(x) << " ";
-	std::cout << std::endl;
-	std::cout << std::endl;
-	std::cout << std::endl;
-
-
-
 
 	bool ifZero;
 
-	for (int i = 0; i < (s.getFraction())*8; i++)
+	while(fracQuotient[0]==0)
 	{
-		
-
 		ifZero = true;
 		for (auto x : fracDivident)
 			if (x != 0)
@@ -927,29 +954,14 @@ void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident
 		if (ifZero)
 			break;
 
-
 		carryFromRot = 0;
 		rlcSevBytes(fracQuotient, carryFromRot);
 		carryFromRot = 0;
 		rrcSevBytes(fracDivisor, carryFromRot);		//skalowanie
 
 
-		for (auto x : fracDivident)
-			std::cout << std::bitset<8>(x) << " ";
-		std::cout << std::endl;
-		for (auto x : fracDivisor)
-			std::cout << std::bitset<8>(x) << " ";
-		std::cout << std::endl;
-		for (auto x : fracQuotient)
-			std::cout << std::bitset<8>(x) << " ";
-		std::cout << std::endl;
-		std::cout << std::endl;
-
-
-
 		if (fracDivident[0] == 255)
 		{
-			std::cout << "+\n";
 			carry = 0;
 			for (int j = (s.getFraction()) * 2; j >= 0; j--)
 			{
@@ -958,7 +970,6 @@ void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident
 		}
 		else
 		{
-			std::cout << "-\n";
 			carry = 0;
 			for (int j = (s.getFraction()) * 2; j >= 0; j--)
 			{
@@ -970,17 +981,21 @@ void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident
 			incSevBytes(fracQuotient);
 		}
 
-
-		
-
-
 	}
 
-	
-	
-	
 
-	
+	for (auto i : exponentQuotient)
+		std::cout << std::bitset<8>(i) << " ";
+
+	std::cout << "|";
+	for (auto i : fracQuotient)
+		std::cout << std::bitset<8>(i) << " ";
+
+	std::cout <<std::endl<<std::endl;
+
+
+	fracQuotient.erase(fracQuotient.begin());
+
 	for (auto i : exponentQuotient)
 		this->floatNumberBits.push_back(i);
 

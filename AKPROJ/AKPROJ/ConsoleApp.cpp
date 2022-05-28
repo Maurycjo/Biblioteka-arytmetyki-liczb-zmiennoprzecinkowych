@@ -160,7 +160,7 @@ void::ConsoleApp::divNumbers()
 {
 	std::cout << "Schemat zaokraglania: Obciecie" << std::endl;
 	enterNumbers();
-	result.multiply(numberA, numberB);
+	result.division(numberA, numberB);
 	std::cout << "Iloraz: ";
 	result.displayNumberBinary();
 }
