@@ -21,12 +21,18 @@
     <ClCompile Include="FloatNumber.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ConsoleApp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FloatNumber.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Standard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ConsoleApp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

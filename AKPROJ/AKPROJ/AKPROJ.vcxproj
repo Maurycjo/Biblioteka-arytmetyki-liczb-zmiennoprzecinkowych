@@ -140,10 +140,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ConsoleApp.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="FloatNumber.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ConsoleApp.h" />
     <ClInclude Include="FloatNumber.h" />
     <ClInclude Include="Standard.h" />
   </ItemGroup>

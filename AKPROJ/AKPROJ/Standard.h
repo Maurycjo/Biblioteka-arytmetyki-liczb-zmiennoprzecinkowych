@@ -4,8 +4,8 @@ static class Standard
 {
 private:
 	//domyslne wartosci dla mnoznika i wykladnika
-	int exponent = 3; //wykladnk
-	int fraction = 4; //mnoznik
+	int exponent = 1; //wykladnk
+	int fraction = 2; //mnoznik
 
 
 public:
@@ -30,6 +30,4 @@ public:
 	{
 		return fraction;
 	}
-
-	
 };

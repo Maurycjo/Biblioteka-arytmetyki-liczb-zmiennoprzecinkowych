@@ -3,72 +3,64 @@
 #include "Standard.h"
 #include <bitset>
 #include <bit>
+#include "ConsoleApp.h"
 
 int main()
 {
 
-	double testA = 9123424323999.9900129;
-	double testB = 0.000000000121243;
-	double result = testA * testB;
-	
+	ConsoleApp consoleApp;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	/*
+	long double testA = 1234.123;
+	long double testB = 1.12;
+	long double result = long double(testA / testB);
+	std::cout.precision(20);
+	std::cout << long double(result) << std::endl;
 	
 	std::cout << "Program started\n";
 
-
-	
-	
-
-
-	
-	
-	Standard s(1, 1);
-	FloatNumber number, number2;
-	//number.setStandard(s);
-	//number.dec2float(result);
-	//number.displayNumberBinary();
-
-	number.setStandard(s);
-	number.dec2float(result);
-	number.displayNumberBinary();
-	number.setBitToRound(1, 1);
-	number.round(RoundType::TOWARD_PLUS_INF);
-	number.displayNumberBinary();
-
-	number2.setStandard(s);
-	number2.dec2float(result);
-	number2.displayNumberBinary();
+	Standard s(1, 2);
+	FloatNumber numberA, numberB;
+	FloatNumber numberResult, divided;
+	numberA.setStandard(s);
+	numberB.setStandard(s);
+	numberResult.setStandard(s);
+	divided.setStandard(s);
 	
 
+	numberA.dec2float(testA);
+	numberB.dec2float(testB);
+	numberResult.dec2float(result);
 
+	std::cout << "numberA\n";
+	numberA.displayNumberBinary();
+	std::cout << "numberB\n";
+	numberB.displayNumberBinary();
+	std::cout << "oczekiwany iloraz\n";
+	numberResult.displayNumberBinary();
+	numberResult.dec2float_alpha(result);
+	numberResult.displayNumberBinary();
+	std::cout << "DIVISION\n";
+	divided.division(numberA, numberB);
+	divided.displayNumberBinary();
 
+	std::cout << "\n";
 
-
-	//
-	//FloatNumber numberA, numberB, numberC, numberD;
-	//numberA.setStandard(s);
-	//numberB.setStandard(s);
-	//numberC.setStandard(s);
-	//numberD.setStandard(s);
-
-	//numberC.dec2float(result);
-
-
-	//std::cout << "numberA\n";
-	//numberA.dec2float(testA);
-	//numberA.displayNumberBinary();
-
-	//std::cout << "numberB\n";
-	//numberB.dec2float(testB);
-	//numberB.displayNumberBinary();
-
-	//std::cout << "\noczekiwana\n";
-	//numberC.displayNumberBinary();
-
-	//std::cout << "**multiply**\n";
-
-	//numberD.multiply(numberA, numberB);
-	//numberD.displayNumberBinary();
-	//
+	*/
 
 
 	return 0;

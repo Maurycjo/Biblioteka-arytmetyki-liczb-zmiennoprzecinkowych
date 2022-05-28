@@ -504,6 +504,7 @@ void FloatNumber::setResultToInfinity()
 
 void FloatNumber::setResultToZero()
 {
+	this->sign = false;
 
 	for (int i = 0; i < s.getExponent(); i++)
 		this->floatNumberBits.push_back(0);
@@ -564,94 +565,6 @@ bool FloatNumber::ifNaN(FloatNumber number)
 	return true;
 }
 
-
-
-void FloatNumber::setBitToRound(bool bitR, bool bitS)
-{
-
-	this->bitR = bitR;
-	this->bitS = bitS;
-}
-
-void FloatNumber::clearBitsToRound()
-{
-
-	this->bitR = 0;
-	this->bitS = 0;
-}
-
-
-
-void FloatNumber::round(RoundType currentRound)
-{
-
-	
-	//fracTab.insert(fracTab.begin(), this->floatNumberBits.begin() + s.getExponent(), this->floatNumberBits.end());
-	
-	bool bitR, bitS;
-
-
-
-
-	switch (currentRound)
-	{
-		case RoundType::TOWARD_ZERO:
-		{
-
-			clearBitsToRound();
-			return;
-
-
-		}
-		case RoundType::TOWARD_PLUS_INF:
-		{
-
-			if (this->sign == true)
-			{
-				clearBitsToRound();
-				return;
-			}
-			else
-			{
-				incSevBytes(this->floatNumberBits);
-			}
-
-		}
-		case RoundType::TOWARD_MINUS_INF:
-		{
-			if (this->sign == false)
-			{
-				clearBitsToRound();
-				return;
-			}
-			else
-			{
-				incSevBytes(this->floatNumberBits);
-				
-			}
-
-
-		}
-		case RoundType::TO_NEAREST_TIES_TO_EVEN:
-		{
-
-
-
-		}
-		case RoundType::TO_NEAREST_TIES_AWAY_FROM_ZERO:
-		{
-
-
-
-		}
-
-	}
-
-
-}
-
-
-
 void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 {
 	//M1 *2^E1* M2*2E2=(M1*M2)*2^(E1+E2)
@@ -672,7 +585,6 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 		this->sign = false;
 		return;
 	}
-	
 	//sprawdzenie znaku ilorazu
 	bool resultSign = true;
 	if (numberA.sign == false && numberB.sign == false)
@@ -684,7 +596,6 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 		resultSign = false;
 	}
 	this->sign = resultSign;
-
 	//n*INFINITY, INFINITY*INFINITY
 	if (ifInfinity(numberA) || ifInfinity(numberB))
 	{
@@ -809,9 +720,6 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 		setResultToInfinity();
 		return;
 	}
-
-
-
 	/*
 	tu bedzie wywolanie metedy zaokraglajacej GRS
 	*/
@@ -829,5 +737,264 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 
 	for (auto i : fracResult)
 		this->floatNumberBits.push_back(i);
+
+}
+
+
+void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident=dzielna, divisor=dzielnik
+{
+	// M1/M2*2^(E1-E2)
+
+	this->setStandard(divident.s);
+
+	// 0/0
+	if (ifZero(divident) && ifZero(divisor))
+	{
+		setResultToNaN();
+		return;
+	}
+	// INF/INF
+	if (ifInfinity(divident) && ifInfinity(divisor))
+	{
+		setResultToNaN();
+		return;
+	}
+	// 0/0
+	if (ifZero(divident) && ifZero(divisor))
+	{
+		setResultToNaN();
+		return;
+	}
+	// n/INF
+	if (ifInfinity(divisor))
+	{
+		setResultToZero();
+		return;
+	}
+	if(((divident.sign) && (divisor.sign))||(!(divident.sign) && !(divisor.sign)))
+		this->sign=false;
+	else
+		this->sign=true;
+	// n/0
+	if (ifZero(divisor))
+	{
+		setResultToInfinity();
+		return;
+	}
+
+	
+	//wykladniki
+	std::vector<uint8_t> exponentDivident;	//wykladnik dzielnej
+	std::vector<uint8_t> exponentDivisor;	//wykladnik dzielnika
+	std::vector<uint8_t> exponentQuotient;	//wykladnik ilorazu
+								
+	exponentDivident.reserve(s.getExponent());	
+	exponentDivisor.reserve(s.getExponent());	
+	exponentDivident.insert(exponentDivident.begin(), divident.floatNumberBits.begin(), divident.floatNumberBits.begin() + s.getExponent());
+	exponentDivisor.insert(exponentDivisor.begin(), divisor.floatNumberBits.begin(), divisor.floatNumberBits.begin() + s.getExponent());
+	exponentQuotient = generateBias();
+	exponentQuotient.insert(exponentQuotient.begin(), 0b00000010);
+
+	uint8_t carry = 0;
+	uint8_t carryFromRot = 0;
+	bool ifInfinity;
+
+	//algorytm obliczajacy wykladnik
+	for (int i = s.getExponent() - 1; i >= 0; i--)
+	{
+		exponentQuotient[i + 1] = addTwoBytes(exponentQuotient[i+1], exponentDivident[i], carry);
+	}
+	exponentQuotient[0] += carry;
+
+	carry = 0;
+	for (int i = s.getExponent() - 1; i >= 0; i--)
+	{
+		exponentQuotient[i + 1] = subbTwoBytes(exponentQuotient[i + 1], exponentDivisor[i], carry);
+	}
+	exponentQuotient[0] -= carry;
+
+	if ((0b00000010 & exponentQuotient[0]) != 0b00000010)
+	{
+		std::cout << "ZDENORMALIZOWANE\n";
+		setResultToZero();
+		return;
+	}
+	if ((0b00000001 & exponentQuotient[0]) == 0b00000001)
+	{
+		//nieskonczonosc
+		setResultToInfinity();
+		return;
+	}
+
+	exponentQuotient.erase(exponentQuotient.begin());
+	ifInfinity = true;
+
+	for (auto i : exponentQuotient)
+	{
+		if (i != 255)
+		{
+			ifInfinity = false;
+			break;
+		}
+	}
+
+	if (ifInfinity)
+	{
+		setResultToInfinity();
+		return;
+	}
+
+	//ta czesc kodu wykona sie kiedy liczba przed ewentualna normalizacja nie bedzie nieskonczonoscia i nie bedzie zdenormalizowana 
+	//mnozniki
+	std::vector<uint8_t> fracDivident;		//mnoznik dzielnej
+	std::vector<uint8_t> fracDivisor;		//mnoznik dzielnika 
+	std::vector<uint8_t> fracQuotient(s.getFraction());		//mnoznik ilorazu inicjalizacja zerami, dodaktkowy bajt na bit ukryty
+
+	fracDivident.reserve(s.getFraction());
+	fracDivisor.reserve(s.getFraction());
+	fracDivident.insert(fracDivident.begin(), divident.floatNumberBits.begin() + s.getExponent(), divident.floatNumberBits.end());
+	fracDivisor.insert(fracDivisor.begin(), divisor.floatNumberBits.begin() + s.getExponent(), divisor.floatNumberBits.end());
+
+	fracDivisor.insert(fracDivisor.begin(), 1);		//bajt z bitem ukrytym
+	fracDivident.insert(fracDivident.begin(), 1);
+
+	//bajty na bufor
+	for (int i = 0; i < (s.getFraction()); i++)
+	{
+		fracDivisor.push_back(0);
+		fracDivident.push_back(0);
+	}
+
+	
+	for (auto x : fracDivident)
+		std::cout << std::bitset<8>(x) << " ";
+	std::cout << std::endl;
+	for (auto x : fracDivisor)
+		std::cout << std::bitset<8>(x) << " ";
+	std::cout << std::endl;
+	for (auto x : fracQuotient)
+		std::cout << std::bitset<8>(x) << " ";
+	std::cout << std::endl;
+	std::cout << std::endl;
+
+	
+	
+
+	//wytworzenie bitu ukrytego
+	carry = 0;
+	for (int i = (s.getExponent())*2; i >=0; i--)
+	{
+		fracDivident[i] = subbTwoBytes(fracDivident[i], fracDivisor[i], carry);		
+	}
+	if (fracDivident[0] == 255)
+	{
+		decSevBytes(exponentQuotient);
+	}
+	else
+	{
+		incSevBytes(fracQuotient);
+		
+	}
+
+	for (auto x : fracDivident)
+		std::cout << std::bitset<8>(x) << " ";
+	std::cout << std::endl;
+	for (auto x : fracDivisor)
+		std::cout << std::bitset<8>(x) << " ";
+	std::cout << std::endl;
+	for (auto x : fracQuotient)
+		std::cout << std::bitset<8>(x) << " ";
+	std::cout << std::endl;
+	std::cout << std::endl;
+	std::cout << std::endl;
+
+
+
+
+	bool ifZero;
+
+	for (int i = 0; i < (s.getFraction())*8; i++)
+	{
+		
+
+		ifZero = true;
+		for (auto x : fracDivident)
+			if (x != 0)
+			{
+				ifZero = false;
+				break;
+			}
+		if (ifZero)
+			break;
+
+
+		carryFromRot = 0;
+		rlcSevBytes(fracQuotient, carryFromRot);
+		carryFromRot = 0;
+		rrcSevBytes(fracDivisor, carryFromRot);		//skalowanie
+
+
+		for (auto x : fracDivident)
+			std::cout << std::bitset<8>(x) << " ";
+		std::cout << std::endl;
+		for (auto x : fracDivisor)
+			std::cout << std::bitset<8>(x) << " ";
+		std::cout << std::endl;
+		for (auto x : fracQuotient)
+			std::cout << std::bitset<8>(x) << " ";
+		std::cout << std::endl;
+		std::cout << std::endl;
+
+
+
+		if (fracDivident[0] == 255)
+		{
+			std::cout << "+\n";
+			carry = 0;
+			for (int j = (s.getFraction()) * 2; j >= 0; j--)
+			{
+				fracDivident[j] = addTwoBytes(fracDivident[j], fracDivisor[j], carry); //dodawanie
+			}
+		}
+		else
+		{
+			std::cout << "-\n";
+			carry = 0;
+			for (int j = (s.getFraction()) * 2; j >= 0; j--)
+			{
+				fracDivident[j] = subbTwoBytes(fracDivident[j], fracDivisor[j], carry); //odejmowanie
+			}
+		}
+		if (fracDivident[0] != 255)
+		{
+			incSevBytes(fracQuotient);
+		}
+
+
+		
+
+
+	}
+
+	
+	
+	
+
+	
+	for (auto i : exponentQuotient)
+		this->floatNumberBits.push_back(i);
+
+	for (auto i : fracQuotient)
+		this->floatNumberBits.push_back(i);
+
+}
+
+FloatNumber::~FloatNumber()
+{
+
+	while (this->floatNumberBits.size() != 0)
+	{
+		this->floatNumberBits.pop_back();
+	}
 
 }

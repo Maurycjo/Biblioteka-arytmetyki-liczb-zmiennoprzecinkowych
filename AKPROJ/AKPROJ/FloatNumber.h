@@ -1,6 +1,5 @@
 #pragma once
 #include "Standard.h"
-#include "roundType.h"
 #include <vector>
 
 
@@ -9,7 +8,6 @@ class FloatNumber
 private:
 	Standard s;
 	bool sign;
-	bool bitR = 0, bitS = 0;
 	std::vector<uint8_t> floatNumberBits;										//vector liczby w standardzie
 	void setResultToInfinity();													//ustawienie liczby w standardzie na nieskonczonosc
 	void setResultToZero();														//ustawienie liczby w standardzie na 0
@@ -28,14 +26,12 @@ private:
 	std::vector<uint8_t> generateBias();										//generowanie obciazenia wykladnika
 	
 public:
-	void clearBitsToRound();
 	void setStandard(Standard s);												//ustawienie standardu
 	void dec2float_alpha(double inputNumber);									//konwersja na liczbe FloatNumber
 	void dec2float(double inputNumber);											//konwersja na liczbe FloatNumber
 	void displayNumberBinary();													//wyswietlenie liczby w formacie binarnym	
 	void multiply(FloatNumber number1, FloatNumber number2);					//mnozenie liczb w standardzie
-	void round(RoundType currentRound=RoundType::TOWARD_ZERO);											//zaokraglanie liczby
-	void round();																//zaokraglanie liczby jako wartosc domyslna do 0
-	void setBitToRound(bool bitR, bool bitS);
+	void division(FloatNumber number1, FloatNumber number2);					//dzielenie liczb w standardzie
+	~FloatNumber();
 };
 
