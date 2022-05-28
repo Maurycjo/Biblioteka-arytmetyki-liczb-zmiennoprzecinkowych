@@ -43,7 +43,7 @@ void test_addition(double x, double y, Standard::roundType round_type)
 
 	std::cout << "*\n";
 
-	Standard s(1, 2, round_type);
+	Standard s(1, 3, round_type);
 	FloatNumber number;
 	number.setStandard(s);
 	number.dec2float(double(x + y));
@@ -67,6 +67,8 @@ void test_addition(double x, double y, Standard::roundType round_type)
 	std::cout << "**addition**\n";
 
 	numberC.addition(numberA, numberB, round_type);
+	std::cout<<std::endl;
+	numberC.displayNumberBinary();
 	// numberC.displayNumberBinary();
 }
 
@@ -79,13 +81,14 @@ int main()
 	RS  01  48.65,2223.22354
 	RS  00  0.2500019073486328125 ,1.1
 	*/
-
-	// test_addition(46564.16,6.23,Standard::roundType::TO_NEAREST_TIES_AWAY_FROM_ZERO);
+	//69.16,89.456
+	test_addition(86.12,-16.89,Standard::roundType::TO_NEAREST_TIES_AWAY_FROM_ZERO);
 	// test(695.12,123.68,Standard::roundType::TO_NEAREST_TIES_AWAY_FROM_ZERO);
 	// test(695.12,123.68,Standard::roundType::TO_NEAREST_TIES_TO_EVEN);
 	// test(-695.12,123.68,Standard::roundType::TOWARD_MINUS_INF);
 	//test(0.00000762453121 ,1.111111111, Standard::roundType::TOWARD_PLUS_INF);
 	// test(695.12,123.68,Standard::roundType::TOWARD_ZERO);
+	/*
 
 	double test_numbers[4][2] = {{695.12, 123.68},  {48.65, 2223.22354}, {0.2500019073486328125 ,1.1}};
 	for (auto i : test_numbers)

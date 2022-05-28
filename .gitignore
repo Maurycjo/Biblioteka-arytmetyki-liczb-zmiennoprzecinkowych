@@ -400,3 +400,13 @@ FodyWeavers.xsd
 # Additional files built by Visual Studio
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudio
+AKPROJ/AKPROJ/a.exe
+AKPROJ/AKPROJ/FloatNumber.exe
+AKPROJ/AKPROJ/main.exe
+AKPROJ/AKPROJ/Standard.h.gch
+AKPROJ/AKPROJ/test.exe
+AKPROJ/AKPROJ/.vscode/launch.json
+AKPROJ/AKPROJ/.vscode/tasks.json
+AKPROJ/AKPROJ/Standard.h.gch
+AKPROJ/AKPROJ/a.exe
+AKPROJ/AKPROJ/test.cpp

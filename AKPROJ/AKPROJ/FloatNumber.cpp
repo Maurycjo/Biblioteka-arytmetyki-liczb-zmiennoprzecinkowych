@@ -190,6 +190,8 @@ void FloatNumber::dec2float(float inputNumber)
 	this->floatNumberBits.insert(floatNumberBits.end(), expTab.begin(), expTab.end());
 	this->floatNumberBits.insert(floatNumberBits.end(), fracTab.begin(), fracTab.end());
 
+	// Tutaj proboje ogarnac GRS ~Paul
+
 	if (denormalized)
 		std::cout << "\ndenormalized" << std::endl;
 }
@@ -506,14 +508,14 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB, Standard::r
 	getGRS(fracResult);
 	// TODO tutaj
 
-	std::cout<<"Wszystkie otrzymane bity: "<<std::endl;
-	std::cout<< "	    " ;
+	std::cout << "Wszystkie otrzymane bity: " << std::endl;
+	std::cout << "	    ";
 	for (auto i : fracResult) // TODO DO USUNIECIA
 	{
-		
+
 		std::cout << std::bitset<8>(i) << " ";
 	}
-	std::cout<<std::endl;
+	std::cout << std::endl;
 
 	while (fracResult.size() != s.getFraction())
 	{
@@ -530,18 +532,19 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB, Standard::r
 	{
 		this->floatNumberBits.push_back(i);
 	}
-
-	
 }
 
 void FloatNumber::addition(FloatNumber numberA, FloatNumber numberB, Standard::roundType round_type)
 {
-
+	bool sign = false;
+	bool greaterB = false;
+	bool greaterA = false;
+	bool scaled = true;
 	setStandard(numberA.s);
 	// mnozniki
 	std::vector<uint8_t> fracA;
 	std::vector<uint8_t> fracB;
-	std::vector<uint8_t> fractResult(s.getFraction()+1,0);
+	std::vector<uint8_t> fractResult(s.getFraction() + 1, 0);
 	fracA.reserve(s.getFraction());
 	fracB.reserve(s.getFraction());
 	fracA.insert(fracA.begin(), numberA.floatNumberBits.begin() + s.getExponent(), numberA.floatNumberBits.end());
@@ -552,47 +555,60 @@ void FloatNumber::addition(FloatNumber numberA, FloatNumber numberB, Standard::r
 	std::vector<uint8_t> exponentB;
 	std::vector<uint8_t> exponentBias;
 	std::vector<uint8_t> exponentDiff(s.getExponent(), 0);
-	
+	std::vector<uint8_t> exponentResult;
+
 	exponentA.reserve(s.getExponent());
 	exponentB.reserve(s.getExponent());
 	exponentA.insert(exponentA.begin(), numberA.floatNumberBits.begin(), numberA.floatNumberBits.begin() + s.getExponent());
 	exponentB.insert(exponentB.begin(), numberB.floatNumberBits.begin(), numberB.floatNumberBits.begin() + s.getExponent());
 	exponentBias = generateBias();
 
-	uint8_t carryFromSub = 0, carryFromRr = 0, carryFromAdd=0;
+	fracB.insert(fracB.end(), 0); // przygotowanie bajtu aby trzymac w nim GRS
+	fracA.insert(fracA.end(), 0);
+
+	uint8_t carryFromSub = 0, carryFromRr = 0, carryFromAdd = 0, carryFromLr = 0;
 
 	for (int i = 0; i < s.getExponent(); i++) // Sprawdz ktory wykladnik jest wiekszy
 	{
 		if (exponentA[i] > exponentB[i])
 		{
+			greaterA = true;
+			exponentResult = exponentA;
 			for (int i = (s.getExponent() - 1); i >= 0; i--)
 			{
 				exponentDiff[i] = subbTwoBytes(exponentA[i], exponentB[i], carryFromSub);
 			}
 
-			for (int i = 0; i < s.getFraction(); i++)
-			{
-				fracB.insert(fracB.end(), 0);
-			}
+			carryFromRr = 0;
+			rrcSevBytes(fracB, carryFromRr);
+			decSevBytes(exponentDiff);
+			fracB[0] = fracB[0] | 0b10000000;
 
-			while (exponentDiff[0] != 0)
+			while (exponentDiff[0] != 0) // przeskalowanie mnoznnika liczby z mniejszym wykladnikiem
 			{
 				carryFromRr = 0;
 				rrcSevBytes(fracB, carryFromRr);
 				decSevBytes(exponentDiff);
 			}
+			// getGRS(fracB);
+			for (int i = 0; i < s.getFraction(); i++)
+			{
+				std::cout << "Skalowanie B : " << int(fracB[i]) << std::endl;
+			}
 		}
 		else if (exponentA[i] < exponentB[i])
 		{
+			greaterB = true;
+			exponentResult = exponentB;
 			for (int i = (s.getExponent() - 1); i >= 0; i--)
 			{
 				exponentDiff[i] = subbTwoBytes(exponentB[i], exponentA[i], carryFromSub);
 			}
 
-			for (int i = 0; i < s.getFraction(); i++)
-			{
-				fracA.insert(fracA.end(), 0); // do przeskalowywania tej liczby potrzebne dwa razy wiecej bajtow
-			}
+			carryFromRr = 0;
+			rrcSevBytes(fracA, carryFromRr);
+			decSevBytes(exponentDiff);
+			fracA[0] = fracA[0] | 0b10000000; // ustalic czy w u2 czy nie
 
 			while (exponentDiff[0] != 0)
 			{
@@ -600,32 +616,134 @@ void FloatNumber::addition(FloatNumber numberA, FloatNumber numberB, Standard::r
 				rrcSevBytes(fracA, carryFromRr);
 				decSevBytes(exponentDiff);
 			}
+			// getGRS(fracA);
+			for (int i = 0; i < s.getFraction(); i++)
+			{
+				std::cout << "Skalowanie A : " << int(fracA[i]) << std::endl;
+			}
 		}
 		else
 		{
-			break;
+			scaled = false;
 		}
+
 		std::cout << "A: " << int(exponentA[i]) << " B: " << int(exponentB[i]) << std::endl;
-		for (int i = 0; i < s.getFraction() + 2; i++)
-		{
-			std::cout << "Skalowanie : " << int(fracB[i]) << std::endl;
-		}
 	}
 
-	if (numberA.sign == 0 && numberB.sign == 0)
+	if (numberA.sign == numberB.sign)
 	{ // obie liczby sa dodatnie
-		numberA.getGRS(fracA);
-		numberB.getGRS(fracB);
-		numberA.prepGRS(fracA);
-		numberB.prepGRS(fracB);
+		// numberA.getGRS(fracA);
+		// numberB.getGRS(fracB); // Tutaj bity maja byc juz przypisane do liczby!!!
 
-		std::cout << "A GRS: " << numberA.Gbit << numberA.Rbit << numberA.Sbit << std::endl;
-		std::cout << "B GRS: " << numberB.Gbit << numberB.Rbit << numberB.Sbit << std::endl;
-		std::cout << "Ostatni bajt: " << int(fracB[2]) << std::endl;
+		// numberA.prepGRS(fracA); // Jak zostanie naprawiona konwersja to odkomentowac
+		// numberB.prepGRS(fracB);
+		// std::cout << "Ostatni bajt: " << int(fracB[s.getFraction()]) << std::endl;
 
-		for (int i = (s.getFraction()); i >= 0; i--)
+		// std::cout << "A GRS: " << numberA.Gbit << numberA.Rbit << numberA.Sbit << std::endl;
+		// std::cout << "B GRS: " << numberB.Gbit << numberB.Rbit << numberB.Sbit << std::endl;
+		// std::cout << "Ostatni bajt: " << int(fracA[s.getFraction()]) << std::endl;
+		if (numberA.sign)
+		{ // dodatnia i dodatnia daje dodatnia, ujemna i ujemna ujemna. Default dodatnia!
+			sign = 1;
+		}
+		for (int i = (s.getFraction()) - 1; i >= 0; i--)
 		{
-			fractResult[i + 1] = addTwoBytes(exponentA[i], exponentB[i], carryFromAdd);
+			fractResult[i] = addTwoBytes(fracA[i], fracB[i], carryFromAdd);
+			std::cout << "DODAJE: " << int(fracA[i]) << " " << int(fracB[i]) << std::endl;
+		}
+
+		if (exponentA == exponentB)
+		{
+			incSevBytes(exponentResult);
+			carryFromRr = 0;
+			rrcSevBytes(fractResult, carryFromRr);
+			if (carryFromAdd)
+			{
+				fractResult[0] = fractResult[0] | 0b10000000;
+			}
+		}
+		else if (carryFromAdd)
+		{
+			carryFromRr = 0;
+			rrcSevBytes(fractResult, carryFromRr);
+			incSevBytes(exponentResult);
+		}
+		for (int i = 0; i < s.getFraction(); i++)
+		{
+			std::cout << int(fractResult[i]) << " ";
+		}
+	}
+	else
+	{ // Ujemna i dodatnia
+		if (!greaterA && !greaterB)
+		{ // Takie same wykladniki, sprawdz mnozniki (DOROBIC COS DLA ROWNYCH LICZB) TUTAJ FLAGI GREATERA GREATER B SIE ZMIENIA
+			for (int i = 0; i < s.getFraction(); i++)
+			{
+				if (fracA[i] > fracB[i])
+				{
+					greaterA = true;
+					break;
+				}
+				else if (fracA[i] < fracB[i])
+				{
+					greaterB = true;
+					break;
+				}
+			}
+			if (!greaterA && !greaterB)
+			{
+				for (auto i : exponentResult)
+				{
+					this->floatNumberBits.push_back(i);
+				} 
+				for (auto i : fractResult)
+				{
+					this->floatNumberBits.push_back(0);
+				}
+				this->sign = sign;
+			}
+		}
+
+		// Jeden wykladnik jest wiekszy
+		if (greaterA) // Zamien mniejsza liczbe na u2
+		{
+			for (int i = 0; i < fracB.size(); i++)
+			{
+				fracB[i] = ~fracB[i];
+			}
+			incSevBytes(fracB);
+			sign = numberA.sign;
+		}
+		else
+		{
+			for (int i = 0; i < fracA.size(); i++)
+			{
+				fracA[i] = ~fracA[i];
+			}
+			incSevBytes(fracA);
+			for (int i = 0; i < fracA.size(); i++)
+			{
+				std::cout << "SRAWDZENIE: " << int(fracA[i]) << std::endl;
+			}
+			sign = numberB.sign;
+		}
+		carryFromAdd = 0;
+		for (int i = (s.getFraction()) - 1; i >= 0; i--)
+		{
+			fractResult[i] = addTwoBytes(fracA[i], fracB[i], carryFromAdd);
+			std::cout << "DODAJE: " << int(fracA[i]) << " " << int(fracB[i]) << std::endl;
+		}
+
+		if (scaled && !carryFromAdd)
+		{ // skalowanie w lewo do momentu 1.xxxx
+			fractResult.insert(fractResult.begin(), 0);
+			while (fractResult[0] != 1)
+			{
+				carryFromLr = 0;
+				rlcSevBytes(fractResult, carryFromLr);
+				decSevBytes(exponentResult);
+			}
+			fractResult.erase(fractResult.begin());
 		}
 	}
 	/*
@@ -635,6 +753,16 @@ void FloatNumber::addition(FloatNumber numberA, FloatNumber numberB, Standard::r
 		b) Zmien go na rowny wiekszemu - przesun mnoznik w lewo
 	3.
 	*/
+
+	for (auto i : exponentResult)
+	{
+		this->floatNumberBits.push_back(i);
+	} // Tutaj dac wykladnik
+	for (auto i : fractResult)
+	{
+		this->floatNumberBits.push_back(i);
+	}
+	this->sign = sign;
 }
 
 void FloatNumber::round(std::vector<uint8_t> &bytes, Standard::roundType round_type)
@@ -727,27 +855,31 @@ void FloatNumber::getGRS(std::vector<uint8_t> bytes)
 
 	Gbit = byte & 0b10000000;
 	Rbit = byte & 0b01000000;
-	Sbit = byte & 0b00100000;
+	Sbit = byte & 0b00111111;
 
 	if (!Sbit)
 	{
-		for (int i = s.getFraction() + 1; i < s.getFraction() * 2; i++)
+		for (int i = s.getFraction() + 1; i < bytes.size(); i++)
 		{
 			Sbit = bytes[i];
 			if (Sbit)
-				break;
+				;
+			break;
 		}
 	}
-	
 }
 
 void FloatNumber::prepGRS(std::vector<uint8_t> &bytes)
 {
-
+	/*
 	while (bytes.size() != s.getFraction() + 1) // zostawiam ostatni bajt zeby przechowac w nim GRS
 	{
 		bytes.pop_back();
 	}
+	*/
+	// Testowanie usuwania
+	bytes.resize(s.getFraction() + 1);
+	bytes.pop_back();
 	uint8_t byte = bytes[s.getFraction()];
 	byte = 0b00000000;
 
