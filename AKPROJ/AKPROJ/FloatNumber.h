@@ -38,8 +38,7 @@ public:
 	void multiply(FloatNumber number1, FloatNumber number2);					//mnozenie liczb w standardzie
 	void division(FloatNumber number1, FloatNumber number2);					//dzielenie liczb w standardzie
 	~FloatNumber();
-	void multiply(FloatNumber number1, FloatNumber number2, Standard::roundType round_type);				//mnozenie liczb w standardzie
-	void addition(FloatNumber number1, FloatNumber number2, Standard::roundType round_type);				//dodawanie liczb w standardzie
+	void addition(FloatNumber number1, FloatNumber number2);				//dodawanie liczb w standardzie
 	
 };
 

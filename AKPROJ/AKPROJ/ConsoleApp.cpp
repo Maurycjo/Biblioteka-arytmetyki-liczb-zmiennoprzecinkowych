@@ -133,7 +133,7 @@ void::ConsoleApp::addNumbers()
 {
 	std::cout << "Schemat zaokraglania: Obciecie" << std::endl;
 	enterNumbers();
-	result.multiply(numberA, numberB);	//to bedzie dodawanie nie mnozenie
+	result.addition(numberA, numberB);	//to bedzie dodawanie nie mnozenie
 	std::cout << "Suma: ";
 	result.displayNumberBinary();
 }

@@ -44,11 +44,6 @@ void FloatNumber::dec2float(double inputNumber)
 	bool isInfinity;
 
 
-
-	//std::cout << "\nintegerPart" << integerPart << std::endl;
-	//std::cout << "afterDec" << afterTheDecPoint<< std::endl;
-
-
 	if (integerPart > 0)
 	{
 		//wyluskanie bitow mnoznika
@@ -403,13 +398,11 @@ void FloatNumber::displayNumberBinary()
 
 	for (int i = 0; i < s.getExponent(); i++)
 	{
-		// std::cout << std::format("{:b}", this->floatNumberBits[i]) << " ";
 		std::cout << std::bitset<8>(floatNumberBits[i]) << " ";
 	}
 	std::cout << "|";
 	for (int i = s.getExponent(); i < s.getFraction() + s.getExponent(); i++)
 	{
-		// std::cout << std::format("{:b}", this->floatNumberBits[i]) << " ";
 		std::cout << std::bitset<8>(floatNumberBits[i]) << " ";
 	}
 	std::cout << std::endl;
@@ -812,9 +805,6 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 	if (this->bitR)
 		fracResult[s.getFraction() + 1] -= 0b01000000;
 
-	
-
-
 	this->bitS = false;
 	for (int i = s.getFraction()+1; i < fracResult.size(); i++)
 	{
@@ -824,16 +814,13 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 			break;
 		}
 	}
-
 	fracResult.erase(fracResult.begin());
 
 	while (fracResult.size() != s.getFraction())
 	{
 		fracResult.pop_back();
 	}
-	// incSevBytes(fracResult);
-
-	round(fracResult, round_type);
+	
 
 	for (auto i : exponentResult)
 		this->floatNumberBits.push_back(i);
@@ -844,7 +831,7 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 	}
 }
 
-void FloatNumber::addition(FloatNumber numberA, FloatNumber numberB, Standard::roundType round_type)
+void FloatNumber::addition(FloatNumber numberA, FloatNumber numberB)
 {
 	bool sign = false;
 	bool greaterB = false;
@@ -1005,7 +992,7 @@ void FloatNumber::addition(FloatNumber numberA, FloatNumber numberB, Standard::r
 				for (auto i : exponentResult)
 				{
 					this->floatNumberBits.push_back(i);
-				} 
+				}
 				for (auto i : fractResult)
 				{
 					this->floatNumberBits.push_back(0);
@@ -1075,16 +1062,16 @@ void FloatNumber::addition(FloatNumber numberA, FloatNumber numberB, Standard::r
 	this->sign = sign;
 }
 
-void FloatNumber::round(std::vector<uint8_t> &bytes, Standard::roundType round_type)
+void FloatNumber::round(std::vector<uint8_t>& bytes, Standard::roundType round_type)
 {
 	uint8_t carryFromAdd = 0;
 
 	switch (round_type)
 	{
 	case Standard::roundType::TO_NEAREST_TIES_AWAY_FROM_ZERO: // Zaokraglenie symetrycznie do parzystej
-		if (!Gbit && !Rbit)
+		if (!bitG && !bitR)
 			break;
-		else if (Gbit)
+		else if (bitG)
 
 			for (int i = (s.getFraction() - 1); i >= 0; i--) // Sprawdzam czy po inkrementacji nie zaokraglimy do nieskonczonosci
 			{
@@ -1093,11 +1080,11 @@ void FloatNumber::round(std::vector<uint8_t> &bytes, Standard::roundType round_t
 					break;
 			}
 		if (carryFromAdd)
-			setResultToInfinity(bytes);
+			setResultToInfinity();
 
 		break;
 	case Standard::roundType::TO_NEAREST_TIES_TO_EVEN: // zaokraglenie symetryczne do wiekszej wartosci bezwzglednej
-		if (!Gbit && !Rbit)
+		if (!bitG && !bitR)
 			break;
 
 		else
@@ -1108,11 +1095,11 @@ void FloatNumber::round(std::vector<uint8_t> &bytes, Standard::roundType round_t
 					break;
 			}
 		if (carryFromAdd)
-			setResultToInfinity(bytes);
+			setResultToInfinity();
 		break;
 
 	case Standard::roundType::TOWARD_MINUS_INF:
-		if (!Gbit && !Rbit)
+		if (!bitG && !bitR)
 			break;
 		else if (sign)
 			for (int i = (s.getFraction() - 1); i >= 0; i--) // Sprawdzam czy po inkrementacji nie zaokraglimy do nieskonczonosci
@@ -1122,13 +1109,13 @@ void FloatNumber::round(std::vector<uint8_t> &bytes, Standard::roundType round_t
 					break;
 			}
 		if (carryFromAdd)
-			setResultToInfinity(bytes);
+			setResultToInfinity();
 		else
 			break;
 		break;
 
 	case Standard::roundType::TOWARD_PLUS_INF:
-		if (!Gbit && !Rbit)
+		if (!bitG && !bitR)
 		{
 			break;
 		}
@@ -1146,7 +1133,7 @@ void FloatNumber::round(std::vector<uint8_t> &bytes, Standard::roundType round_t
 					break;
 			}
 			if (carryFromAdd)
-				setResultToInfinity(bytes);
+				setResultToInfinity();
 		}
 
 		break;
@@ -1163,10 +1150,20 @@ void FloatNumber::getGRS(std::vector<uint8_t> bytes)
 {
 	uint8_t byte = bytes[s.getFraction()];
 
-	Gbit = byte & 0b10000000;
-	Rbit = byte & 0b01000000;
-	Sbit = byte & 0b00111111;
+	bitG = byte & 0b10000000;
+	bitR = byte & 0b01000000;
+	bitS = byte & 0b00111111;
 
+	if (!bitS)
+	{
+		for (int i = s.getFraction() + 1; i < bytes.size(); i++)
+		{
+			bitS = bytes[i];
+			if (bitS)
+				;
+			break;
+		}
+	}
 }
 
 void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident=dzielna, divisor=dzielnik
@@ -1423,17 +1420,6 @@ FloatNumber::~FloatNumber()
 	this->bitS = false;
 
 }
-	if (!Sbit)
-	{
-		for (int i = s.getFraction() + 1; i < bytes.size(); i++)
-		{
-			Sbit = bytes[i];
-			if (Sbit)
-				;
-			break;
-		}
-	}
-}
 
 void FloatNumber::prepGRS(std::vector<uint8_t> &bytes)
 {
@@ -1449,11 +1435,11 @@ void FloatNumber::prepGRS(std::vector<uint8_t> &bytes)
 	uint8_t byte = bytes[s.getFraction()];
 	byte = 0b00000000;
 
-	if (Gbit)
+	if (bitG)
 		byte = byte | 0b10000000;
-	if (Rbit)
+	if (bitR)
 		byte = byte | 0b01000000;
-	if (Sbit)
+	if (bitS)
 		byte = byte | 0b00100000;
 
 	bytes[s.getFraction()] = byte;
