@@ -9,6 +9,7 @@ class FloatNumber
 private:
 	Standard s;
 	bool sign;
+	bool bitG = 0, bitR = 0, bitS = 0;
 	std::vector<uint8_t> floatNumberBits;										//vector liczby w standardzie
 	void setResultToInfinity();													//ustawienie liczby w standardzie na nieskonczonosc
 	void setResultToZero();														//ustawienie liczby w standardzie na 0

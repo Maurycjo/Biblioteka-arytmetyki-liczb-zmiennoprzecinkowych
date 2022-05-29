@@ -8,30 +8,29 @@
 int main()
 {
 
-	std::string liczba = "0|10100000 |1110000|||1";
-	Standard s(1, 1);
-
-	FloatNumber stringNumber;
-	stringNumber.setStandard(s);
-	//std::cout << "podaj\n";
-	//std::cin >> liczba;
-	if (stringNumber.string2float(liczba))
-		stringNumber.displayNumberBinary();
-	else
-		std::cout << "false";
-
+	
+		
 
 
 
 
 	//ConsoleApp consoleApp;
 
-	/*
-	long double testA = 1230.17723;
-	long double testB = 1455.12999995;
-	long double result = long double(testA / testB);
-	std::cout.precision(20);
-	std::cout << long double(result) << std::endl;
+
+	long double testA = 124.75;
+	long double testB = 112.75;
+	long double result = long double(testA * testB);
+
+	std::string testStrA = "0|01111110 |01000000 00000000";
+	std::string testStrB = "0|01111111 |00100000 00000000";
+
+	std::cout << result << std::endl;
+
+
+
+
+
+
 	
 	std::cout << "Program started\n";
 
@@ -43,26 +42,27 @@ int main()
 	numberResult.setStandard(s);
 	divided.setStandard(s);
 	
-
+	
+	//numberA.string2float(testStrA);
+	//numberB.string2float(testStrB);
 	numberA.dec2float(testA);
 	numberB.dec2float(testB);
 	numberResult.dec2float(result);
 
-	std::cout << "numberA\n";
+	std::cout << "numberA: ";
 	numberA.displayNumberBinary();
-	std::cout << "numberB\n";
+	std::cout << "numberB: ";
 	numberB.displayNumberBinary();
-	std::cout << "oczekiwany iloraz\n";
+	std::cout << "oczekiwany iloczyn\n";
 	numberResult.displayNumberBinary();
-	numberResult.dec2float_alpha(result);
-	numberResult.displayNumberBinary();
-	std::cout << "DIVISION\n";
-	divided.division(numberA, numberB);
+	
+	std::cout << "\nMULTIPLY\n";
+	divided.multiply(numberA, numberB);
 	divided.displayNumberBinary();
 
 	std::cout << "\n";
 
-	*/
+	
 
 
 	return 0;

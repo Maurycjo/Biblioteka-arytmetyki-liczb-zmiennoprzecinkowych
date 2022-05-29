@@ -42,6 +42,12 @@ void FloatNumber::dec2float(double inputNumber)
 	long long tempNumber = integerPart;
 	bool isInfinity;
 
+
+
+	//std::cout << "\nintegerPart" << integerPart << std::endl;
+	//std::cout << "afterDec" << afterTheDecPoint<< std::endl;
+
+
 	if (integerPart > 0)
 	{
 		//wyluskanie bitow mnoznika
@@ -562,6 +568,10 @@ void FloatNumber::setResultToInfinity()
 	for (int i = 0; i < s.getFraction(); i++)
 		this->floatNumberBits.push_back(0);
 
+	bitG = false;
+	bitR = false;
+	bitS = false;
+
 	std::cout << "INFINITY\n";
 }
 
@@ -576,6 +586,10 @@ void FloatNumber::setResultToZero()
 	for (int i = 0; i < s.getFraction(); i++)
 		this->floatNumberBits.push_back(0);
 
+	bitG = false;
+	bitR = false;
+	bitS = false;
+
 }
 
 void FloatNumber::setResultToNaN()
@@ -588,6 +602,10 @@ void FloatNumber::setResultToNaN()
 		this->floatNumberBits.push_back(0);
 
 	this->floatNumberBits.push_back(1);
+
+	bitG = false;
+	bitR = false;
+	bitS = false;
 
 }
 
@@ -712,8 +730,6 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 	exponentResult.erase(exponentResult.begin());		//usuniecie bufora
 
 
-	//tymaczasowo przyjmuje ze liczby nie sa zdenormalizowane(do zmiany!!!)
-
 	fracA.insert(fracA.begin(), 1);	//dodanie bajtow z bitem ukrytym
 	fracB.insert(fracB.begin(), 1);
 
@@ -783,9 +799,32 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 		setResultToInfinity();
 		return;
 	}
-	/*
-	tu bedzie wywolanie metedy zaokraglajacej GRS
-	*/
+	
+	uint8_t grsBits = fracResult[s.getFraction()+1];
+
+	if ((0b10000000 & grsBits) == 0b10000000)
+		this->bitG = true;
+
+	if ((0b01000000 & grsBits) == 0b01000000)
+		this->bitR = true;
+
+	if (this->bitG)
+		fracResult[s.getFraction() + 1] -= 0b10000000;
+	if (this->bitR)
+		fracResult[s.getFraction() + 1] -= 0b01000000;
+
+	
+
+
+	this->bitS = false;
+	for (int i = s.getFraction()+1; i < fracResult.size(); i++)
+	{
+		if (fracResult[i] != 0)
+		{
+			this->bitS = true;
+			break;
+		}
+	}
 
 	fracResult.erase(fracResult.begin());
 
@@ -975,6 +1014,8 @@ void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident
 			{
 				fracDivident[j] = subbTwoBytes(fracDivident[j], fracDivisor[j], carry); //odejmowanie
 			}
+
+			
 		}
 		if (fracDivident[0] != 255)
 		{
@@ -983,15 +1024,53 @@ void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident
 
 	}
 
+	//bity GR
+	for (int i = 0; i < 2; i++)
+	{
+		carryFromRot = 0;
+		rrcSevBytes(fracDivisor, carryFromRot);		//skalowanie
 
-	for (auto i : exponentQuotient)
-		std::cout << std::bitset<8>(i) << " ";
+		if (fracDivident[0] == 255)
+		{
+			carry = 0;
+			for (int j = (s.getFraction()) * 2; j >= 0; j--)
+			{
+				fracDivident[j] = addTwoBytes(fracDivident[j], fracDivisor[j], carry); //dodawanie
+			}
+		}
+		else
+		{
+			carry = 0;
+			for (int j = (s.getFraction()) * 2; j >= 0; j--)
+			{
+				fracDivident[j] = subbTwoBytes(fracDivident[j], fracDivisor[j], carry); //odejmowanie
+			}
+		}
+		if (fracDivident[0] != 255)
+		{
+			
+			if (i == 0)
+			{
+				this->bitG = true;
+			}
+			else if (i == 1)
+			{
+				this->bitR = true;
+			}
+		}
+	}
 
-	std::cout << "|";
-	for (auto i : fracQuotient)
-		std::cout << std::bitset<8>(i) << " ";
+	//bitS sprawdzany czy reszta zdzielenia jest nie zerowa
+	bitS = false;
+	for (auto i : fracDivident)
+	{
+		if (i != 0)
+		{
+			this->bitS = true;
+			break;
+		}
 
-	std::cout <<std::endl<<std::endl;
+	}
 
 
 	fracQuotient.erase(fracQuotient.begin());
@@ -1011,5 +1090,9 @@ FloatNumber::~FloatNumber()
 	{
 		this->floatNumberBits.pop_back();
 	}
+
+	this->bitG = false;
+	this->bitR = false;
+	this->bitS = false;
 
 }
