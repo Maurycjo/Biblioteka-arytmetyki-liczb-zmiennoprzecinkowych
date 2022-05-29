@@ -26,7 +26,9 @@ private:
 	void incSevBytes(std::vector<uint8_t>& number);								//inkrementacja bez przeniesienia vektora bajtow
 	void decSevBytes(std::vector<uint8_t>& number);								//dekrementacja bez przeniesienia vektora bajtow
 	std::vector<uint8_t> generateBias();										//generowanie obciazenia wykladnika
-	
+	void round(std::vector<uint8_t>& bytes, Standard::roundType round_type);
+	void getGRS(std::vector<uint8_t> bytes);
+	void prepGRS(std::vector<uint8_t>& bytes);									//Przygotowuje bity GRS do obliczen
 public:
 	void setStandard(Standard s);												//ustawienie standardu
 	void dec2float_alpha(double inputNumber);									//konwersja na liczbe FloatNumber
@@ -36,5 +38,8 @@ public:
 	void multiply(FloatNumber number1, FloatNumber number2);					//mnozenie liczb w standardzie
 	void division(FloatNumber number1, FloatNumber number2);					//dzielenie liczb w standardzie
 	~FloatNumber();
+	void multiply(FloatNumber number1, FloatNumber number2, Standard::roundType round_type);				//mnozenie liczb w standardzie
+	void addition(FloatNumber number1, FloatNumber number2, Standard::roundType round_type);				//dodawanie liczb w standardzie
+	
 };
 

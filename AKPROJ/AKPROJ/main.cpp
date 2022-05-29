@@ -5,8 +5,9 @@
 #include <bit>
 #include "ConsoleApp.h"
 
-int main()
+void test(double x, double y, Standard::roundType round_type)
 {
+	std::cout << "*\n";
 
 	
 		
@@ -30,6 +31,9 @@ int main()
 
 
 
+	/*
+	double testA = 2.0;
+	double testB = 1.0;
 
 	
 	std::cout << "Program started\n";
