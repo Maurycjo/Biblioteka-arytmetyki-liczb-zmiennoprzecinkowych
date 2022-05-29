@@ -1073,7 +1073,7 @@ void FloatNumber::addition(FloatNumber numberA, FloatNumber numberB)
 			incSevBytes(fracA);
 			for (int i = 0; i < fracA.size(); i++)
 			{
-				std::cout << "SRAWDZENIE: " << int(fracA[i]) << std::endl;
+				std::cout << "SRAWDZENIE: "<< i << int(fracA[i]) << std::endl;
 			}
 			sign = numberB.sign;
 		}
