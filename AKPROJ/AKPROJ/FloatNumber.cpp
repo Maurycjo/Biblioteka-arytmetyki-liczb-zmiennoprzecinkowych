@@ -24,7 +24,7 @@ void FloatNumber::dec2float(double inputNumber)
 		return;
 	}
 
-	std::vector<uint8_t> fracTab(s.getFraction()+2, 0);
+	std::vector<uint8_t> fracTab(s.getFraction()+1, 0);
 	std::vector<uint8_t> expTab = generateBias();
 	expTab.insert(expTab.begin(), 0);
 	uint8_t carryFromAdd = 0, carryFromRot = 0, carryFromSubb = 0;
@@ -162,6 +162,13 @@ void FloatNumber::dec2float(double inputNumber)
 
 	for (auto i : fracTab)
 		this->floatNumberBits.push_back(i);
+
+	
+	while (expTab.size() > 0)
+		expTab.pop_back();
+
+	while (fracTab.size() > 0)
+		fracTab.pop_back();
 
 
 }
@@ -669,7 +676,7 @@ bool FloatNumber::ifNaN(FloatNumber number)
 
 bool FloatNumber::ifOne(FloatNumber number)
 {
-
+	
 	if (number.floatNumberBits[0] != 0b01111111)
 	{
 		return false;
@@ -696,7 +703,6 @@ bool FloatNumber::ifOne(FloatNumber number)
 void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 {
 	//M1 *2^E1* M2*2E2=(M1*M2)*2^(E1+E2)
-
 
 	this->setStandard(numberA.s);
 
@@ -731,6 +737,25 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 		this->setResultToInfinity();
 		return;
 	}
+	if (ifOne(numberA))
+	{
+		for (auto i : numberB.floatNumberBits)
+		{
+			this->floatNumberBits.push_back(i);
+		}
+		return;
+	}
+	if (ifOne(numberB))
+	{
+		for (auto i : numberA.floatNumberBits)
+		{
+			this->floatNumberBits.push_back(i);
+		}
+		return;
+	}
+
+
+
 
 	//mnozniki
 	std::vector<uint8_t> fracA;
@@ -1258,13 +1283,16 @@ void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident
 		setResultToInfinity();
 		return;
 	}
-
 	if (ifOne(divisor))
 	{
-		//return divident;
+		for (auto i : divident.floatNumberBits)
+			this->floatNumberBits.push_back(i);
+		return;
 	}
 
 
+
+	
 	//wykladniki
 	std::vector<uint8_t> exponentDivident;	//wykladnik dzielnej
 	std::vector<uint8_t> exponentDivisor;	//wykladnik dzielnika
@@ -1457,8 +1485,6 @@ void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident
 		}
 
 	}
-
-
 	fracQuotient.erase(fracQuotient.begin());
 
 	for (auto i : exponentQuotient)
@@ -1472,11 +1498,9 @@ void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident
 FloatNumber::~FloatNumber()
 {
 
-
 	while (floatNumberBits.size() > 0)
 	{
-
-	this->floatNumberBits.pop_back();
+		this->floatNumberBits.pop_back();
 	}
 
 	this->bitG = false;

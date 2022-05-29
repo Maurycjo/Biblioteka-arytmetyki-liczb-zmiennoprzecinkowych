@@ -8,7 +8,6 @@ ConsoleApp::ConsoleApp()
 	choseOption();
 }
 
-
 void::ConsoleApp::choseOption()
 {
 
@@ -16,7 +15,7 @@ void::ConsoleApp::choseOption()
 
 	while (menuNumber != 0)
 	{
-
+		FloatNumber numberA, numberB, result;
 
 		std::cout << "Aplikacja wykorzystujaca biblioteke arytmetyki liczb zmiennoprzecinkowych" << std::endl << std::endl;
 		std::cout << "(1) Zmien opcje podawania liczb, Obecnie: ";
@@ -60,16 +59,16 @@ void::ConsoleApp::choseOption()
 			std::cout << "SCHEMAT ZAOKROGALNIA\n";
 			break;
 		case 4:
-			addNumbers();
+			addNumbers(numberA, numberB, result);
 			break;
 		case 5:
-			subbNumbers();
+			subbNumbers(numberA, numberB, result);
 			break;
 		case 6:
-			mulNumbers();
+			mulNumbers(numberA, numberB, result);
 			break;
 		case 7:
-			divNumbers();
+			divNumbers(numberA, numberB, result);
 			break;
 		case 8:
 			system("cls");
@@ -136,59 +135,59 @@ void::ConsoleApp::setNumberInput()
 
 }
 
-void::ConsoleApp::addNumbers()
+void::ConsoleApp::addNumbers(FloatNumber numberA, FloatNumber numberB, FloatNumber result)
 {
 	std::cout << "Schemat zaokraglania: Obciecie" << std::endl;
-	enterNumbers();
+	enterNumbers(numberA, numberB);
 	result.addition(numberA, numberB);	//to bedzie dodawanie nie mnozenie
 	std::cout << "Suma:     ";
 	result.displayNumberBinary();
 }
 
-void::ConsoleApp::subbNumbers()
+void::ConsoleApp::subbNumbers(FloatNumber numberA, FloatNumber numberB, FloatNumber result)
 {
 	std::cout << "Schemat zaokraglania: Obciecie" << std::endl;
-	enterNumbers();
+	enterNumbers(numberA, numberB);
 	result.multiply(numberA, numberB);	//to bedzie odejmowanie nie mnozenie
 	std::cout << "Roznica:  ";
 	result.displayNumberBinary();
 }
 
-void::ConsoleApp::mulNumbers()
+void::ConsoleApp::mulNumbers(FloatNumber numberA, FloatNumber numberB, FloatNumber result)
 {
 	std::cout << "Schemat zaokraglania: Obciecie" << std::endl;
-	enterNumbers();
+	enterNumbers(numberA, numberB);
 	result.multiply(numberA, numberB);
 
 	std::cout << "Iloczyn:  ";
 	result.displayNumberBinary();
 }
 
-void::ConsoleApp::divNumbers()
+void::ConsoleApp::divNumbers(FloatNumber numberA, FloatNumber numberB, FloatNumber result)
 {
 	std::cout << "Schemat zaokraglania: Obciecie" << std::endl;
-	enterNumbers();
+	enterNumbers(numberA, numberB);
 	result.division(numberA, numberB);
 	std::cout << "Iloraz:   ";
 	result.displayNumberBinary();
 }
 
-void::ConsoleApp::enterNumbers()
+void::ConsoleApp::enterNumbers(FloatNumber& numberA, FloatNumber& numberB)
 {
 	long double A, B;
 	std::string strA, strB;
 
 	displayCurrentStandard();
-	this->numberA.setStandard(this->s);
-	this->numberB.setStandard(this->s);
+	numberA.setStandard(this->s);
+	numberB.setStandard(this->s);
 	std::cout << "Podaj liczby ";
 	if (numberInput == 1)
 	{
 		std::cout << "dziesietnie" << std::endl;
 		std::cin >> A;
 		std::cin >> B;
-		this->numberA.dec2float(A);
-		this->numberB.dec2float(B);
+		numberA.dec2float(A);
+		numberB.dec2float(B);
 	}
 	else
 	{
