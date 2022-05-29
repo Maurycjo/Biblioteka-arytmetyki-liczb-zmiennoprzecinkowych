@@ -639,12 +639,12 @@ bool FloatNumber::ifNaN(FloatNumber number)
 
 void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 {
-	// M1 *2^E1* M2*2E2=(M1*M2)*2^(E1+E2)
+	//M1 *2^E1* M2*2E2=(M1*M2)*2^(E1+E2)
 
 	this->setStandard(numberA.s);
 
 	//0*INFINITY
-	if (ifZero(numberA) && ifInfinity(numberB)||ifInfinity(numberA)&&ifZero(numberB))
+	if (ifZero(numberA) && ifInfinity(numberB) || ifInfinity(numberA) && ifZero(numberB))
 	{
 		this->setResultToNaN();
 		this->sign = true;
@@ -675,18 +675,18 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 		return;
 	}
 
-	// mnozniki
+	//mnozniki
 	std::vector<uint8_t> fracA;
 	std::vector<uint8_t> fracB;
-	std::vector<uint8_t> fracResult(s.getFraction() * 2+1, 0);		//inicjalizacja zerami
+	std::vector<uint8_t> fracResult(s.getFraction() * 2 + 1, 0);		//inicjalizacja zerami
 	fracA.reserve(s.getFraction());
-	fracB.reserve(s.getFraction());	
+	fracB.reserve(s.getFraction());
 	fracA.insert(fracA.begin(), numberA.floatNumberBits.begin() + s.getExponent(), numberA.floatNumberBits.end());
 	fracB.insert(fracB.begin(), numberB.floatNumberBits.begin() + s.getExponent(), numberB.floatNumberBits.end());
 	//wykladniki
 	std::vector<uint8_t> exponentA;
 	std::vector<uint8_t> exponentB;
-	std::vector<uint8_t> exponentResult(s.getExponent()+1, 0);		//jeden dodatkowy bajt buforujacy
+	std::vector<uint8_t> exponentResult(s.getExponent() + 1, 0);		//jeden dodatkowy bajt buforujacy
 	std::vector<uint8_t> exponentBias;								//obciazenie
 	exponentA.reserve(s.getExponent());
 	exponentB.reserve(s.getExponent());
@@ -694,20 +694,20 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 	exponentB.insert(exponentB.begin(), numberB.floatNumberBits.begin(), numberB.floatNumberBits.begin() + s.getExponent());
 	exponentBias = generateBias();
 
-	
+
 	uint8_t carryFromRl = 0, carryFromRr = 0, carryFromAdd = 0, carryFromSubb = 0; //bajty przeniesienia rotacji w lewo, rotacji w prawo, dodawanie bajtow, odejmowania
 
 	//wytworzenie bajtow wykladnika
-	for (int i = (s.getExponent()-1); i >= 0; i--)
+	for (int i = (s.getExponent() - 1); i >= 0; i--)
 	{
-		exponentResult[i+1] = addTwoBytes(exponentA[i], exponentB[i], carryFromAdd);
+		exponentResult[i + 1] = addTwoBytes(exponentA[i], exponentB[i], carryFromAdd);
 	}
 	exponentResult[0] += carryFromAdd;
-	
+
 	//mamy dwa obciazenia wiec jedno trzeba odjac
-	for (int i = (s.getExponent()-1); i >= 0; i--)
+	for (int i = (s.getExponent() - 1); i >= 0; i--)
 	{
-		exponentResult[i+1] = subbTwoBytes(exponentResult[i+1], exponentBias[i], carryFromSubb);
+		exponentResult[i + 1] = subbTwoBytes(exponentResult[i + 1], exponentBias[i], carryFromSubb);
 	}
 	exponentResult[0] -= carryFromSubb;
 
@@ -730,7 +730,7 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 	}
 
 	//algortym realizujacy wytworzenie bajtow mnoznika wyniku
-	for (int i = 0; i < (s.getFraction()+1) * 8; i++)
+	for (int i = 0; i < (s.getFraction() + 1) * 8; i++)
 	{
 		carryFromRr = 0;
 		rrcSevBytes(fracB, carryFromRr);
@@ -738,7 +738,7 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 		if (carryFromRr == 1)
 		{
 			carryFromAdd = 0;
-			for (int j = s.getFraction()*2; j>=0; j--)
+			for (int j = s.getFraction() * 2; j >= 0; j--)
 			{
 				fracResult[j] = addTwoBytes(fracResult[j], fracA[j], carryFromAdd);		//dodanie przeskalowanego iloczynu czesciowego to mnoznika wyniku
 			}
@@ -790,8 +790,8 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 		setResultToInfinity();
 		return;
 	}
-	
-	uint8_t grsBits = fracResult[s.getFraction()+1];
+
+	uint8_t grsBits = fracResult[s.getFraction() + 1];
 
 	if ((0b10000000 & grsBits) == 0b10000000)
 		this->bitG = true;
@@ -804,8 +804,11 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 	if (this->bitR)
 		fracResult[s.getFraction() + 1] -= 0b01000000;
 
+
+
+
 	this->bitS = false;
-	for (int i = s.getFraction()+1; i < fracResult.size(); i++)
+	for (int i = s.getFraction() + 1; i < fracResult.size(); i++)
 	{
 		if (fracResult[i] != 0)
 		{
@@ -813,21 +816,21 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 			break;
 		}
 	}
+
 	fracResult.erase(fracResult.begin());
 
 	while (fracResult.size() != s.getFraction())
 	{
 		fracResult.pop_back();
+
 	}
-	
 
 	for (auto i : exponentResult)
 		this->floatNumberBits.push_back(i);
 
 	for (auto i : fracResult)
-	{
 		this->floatNumberBits.push_back(i);
-	}
+
 }
 
 void FloatNumber::addition(FloatNumber numberA, FloatNumber numberB)
@@ -1195,10 +1198,10 @@ void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident
 		setResultToZero();
 		return;
 	}
-	if(((divident.sign) && (divisor.sign))||(!(divident.sign) && !(divisor.sign)))
-		this->sign=false;
+	if (((divident.sign) && (divisor.sign)) || (!(divident.sign) && !(divisor.sign)))
+		this->sign = false;
 	else
-		this->sign=true;
+		this->sign = true;
 	// n/0
 	if (ifZero(divisor))
 	{
@@ -1206,14 +1209,14 @@ void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident
 		return;
 	}
 
-	
+
 	//wykladniki
 	std::vector<uint8_t> exponentDivident;	//wykladnik dzielnej
 	std::vector<uint8_t> exponentDivisor;	//wykladnik dzielnika
 	std::vector<uint8_t> exponentQuotient;	//wykladnik ilorazu
-								
-	exponentDivident.reserve(s.getExponent());	
-	exponentDivisor.reserve(s.getExponent());	
+
+	exponentDivident.reserve(s.getExponent());
+	exponentDivisor.reserve(s.getExponent());
 	exponentDivident.insert(exponentDivident.begin(), divident.floatNumberBits.begin(), divident.floatNumberBits.begin() + s.getExponent());
 	exponentDivisor.insert(exponentDivisor.begin(), divisor.floatNumberBits.begin(), divisor.floatNumberBits.begin() + s.getExponent());
 	exponentQuotient = generateBias();
@@ -1226,7 +1229,7 @@ void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident
 	//algorytm obliczajacy wykladnik
 	for (int i = s.getExponent() - 1; i >= 0; i--)
 	{
-		exponentQuotient[i + 1] = addTwoBytes(exponentQuotient[i+1], exponentDivident[i], carry);
+		exponentQuotient[i + 1] = addTwoBytes(exponentQuotient[i + 1], exponentDivident[i], carry);
 	}
 	exponentQuotient[0] += carry;
 
@@ -1272,7 +1275,7 @@ void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident
 	//mnozniki
 	std::vector<uint8_t> fracDivident;		//mnoznik dzielnej
 	std::vector<uint8_t> fracDivisor;		//mnoznik dzielnika 
-	std::vector<uint8_t> fracQuotient(s.getFraction()+1);
+	std::vector<uint8_t> fracQuotient(s.getFraction() + 1);
 
 	fracDivident.reserve(s.getFraction());
 	fracDivisor.reserve(s.getFraction());
@@ -1289,9 +1292,9 @@ void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident
 	}
 	//wytworzenie bitu ukrytego
 	carry = 0;
-	for (int i = (s.getExponent())*2; i >=0; i--)
+	for (int i = (s.getExponent()) * 2; i >= 0; i--)
 	{
-		fracDivident[i] = subbTwoBytes(fracDivident[i], fracDivisor[i], carry);		
+		fracDivident[i] = subbTwoBytes(fracDivident[i], fracDivisor[i], carry);
 	}
 	if (fracDivident[0] == 255)
 	{
@@ -1304,7 +1307,7 @@ void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident
 
 	bool ifZero;
 
-	while(fracQuotient[0]==0)
+	while (fracQuotient[0] == 0)
 	{
 		ifZero = true;
 		for (auto x : fracDivident)
@@ -1338,7 +1341,7 @@ void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident
 				fracDivident[j] = subbTwoBytes(fracDivident[j], fracDivisor[j], carry); //odejmowanie
 			}
 
-			
+
 		}
 		if (fracDivident[0] != 255)
 		{
@@ -1371,7 +1374,7 @@ void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident
 		}
 		if (fracDivident[0] != 255)
 		{
-			
+
 			if (i == 0)
 			{
 				this->bitG = true;
