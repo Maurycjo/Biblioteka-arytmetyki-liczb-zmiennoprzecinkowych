@@ -923,6 +923,7 @@ void FloatNumber::addition(FloatNumber numberA, FloatNumber numberB)
 		}
 		else
 		{
+			exponentResult=exponentA;
 			scaled = false;
 		}
 
@@ -967,10 +968,12 @@ void FloatNumber::addition(FloatNumber numberA, FloatNumber numberB)
 			rrcSevBytes(fractResult, carryFromRr);
 			incSevBytes(exponentResult);
 		}
+		std::cout<<"WYNIK: " ;
 		for (int i = 0; i < s.getFraction(); i++)
 		{
 			std::cout << int(fractResult[i]) << " ";
 		}
+		std::cout<<std::endl;
 	}
 	else
 	{ // Ujemna i dodatnia
