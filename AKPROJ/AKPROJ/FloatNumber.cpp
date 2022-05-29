@@ -156,20 +156,6 @@ void FloatNumber::dec2float(double inputNumber)
 		this->bitS = false;
 	}
 
-	std::cout << "GRS: " << int(bitG) << int(bitR) << int(bitS);
-
-	std::cout << "temp" << tempNumber << std::endl;
-	std::cout << "frac" << afterTheDecPoint<< std::endl;
-
-	for (auto i : fracTab)
-	{
-		std::cout << std::bitset<8>(i) << " ";
-	}
-	std::cout << std::endl;
-
-
-
-
 	this->floatNumberBits.reserve(expTab.size() + fracTab.size());
 	this->floatNumberBits.insert(floatNumberBits.end(), expTab.begin(), expTab.end());
 	this->floatNumberBits.insert(floatNumberBits.end(), fracTab.begin(), fracTab.end());
@@ -678,6 +664,11 @@ bool FloatNumber::ifNaN(FloatNumber number)
 	return true;
 }
 
+bool FloatNumber::ifOne(FloatNumber number)
+{
+	return false;
+}
+
 void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 {
 	//M1 *2^E1* M2*2E2=(M1*M2)*2^(E1+E2)
@@ -715,6 +706,8 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 		this->setResultToInfinity();
 		return;
 	}
+
+
 
 	//mnozniki
 	std::vector<uint8_t> fracA;
