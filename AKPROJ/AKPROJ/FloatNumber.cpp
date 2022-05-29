@@ -924,10 +924,13 @@ void FloatNumber::addition(FloatNumber numberA, FloatNumber numberB)
 				decSevBytes(exponentDiff);
 			}
 			// getGRS(fracB);
+			std::cout<<"PRZESKALOWANO B: ";
 			for (int i = 0; i < s.getFraction(); i++)
 			{
-				std::cout << "Skalowanie B : " << int(fracB[i]) << std::endl;
+				//std::cout << "Skalowanie B : " << int(fracB[i]) << std::endl;
+				std::cout << std::bitset<8>(fracB[i])<<" ";
 			}
+			std::cout<<std::endl;
 		}
 		else if (exponentA[i] < exponentB[i])
 		{
@@ -950,10 +953,14 @@ void FloatNumber::addition(FloatNumber numberA, FloatNumber numberB)
 				decSevBytes(exponentDiff);
 			}
 			// getGRS(fracA);
+			std::cout << "PRZESKALOWANO A: ";
 			for (int i = 0; i < s.getFraction(); i++)
 			{
-				std::cout << "Skalowanie A : " << int(fracA[i]) << std::endl;
+				std::cout << std::bitset<8>(fracA[i])<<" ";
+				//std::cout << "Skalowanie A : " << int(fracA[i]) << std::endl;
 			}
+			std::cout<<std::endl;
+			
 		}
 		else
 		{
