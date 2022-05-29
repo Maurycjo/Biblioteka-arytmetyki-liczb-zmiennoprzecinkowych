@@ -1,6 +1,5 @@
 #include <iostream>
 #include <math.h>
-#include <format>
 #include <cassert>
 #include <cmath>
 #include <bitset>
