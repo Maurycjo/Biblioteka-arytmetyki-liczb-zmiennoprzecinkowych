@@ -159,9 +159,18 @@ void FloatNumber::dec2float(double inputNumber)
 		this->bitS = false;
 	}
 
-	this->floatNumberBits.reserve(expTab.size() + fracTab.size());
-	this->floatNumberBits.insert(floatNumberBits.end(), expTab.begin(), expTab.end());
-	this->floatNumberBits.insert(floatNumberBits.end(), fracTab.begin(), fracTab.end());
+	for (auto i : expTab)
+		this->floatNumberBits.push_back(i);
+
+	for (auto i : fracTab)
+		this->floatNumberBits.push_back(i);
+
+	
+	while (expTab.size() > 0)
+		expTab.pop_back();
+
+	while (fracTab.size() > 0)
+		fracTab.pop_back();
 
 
 }
@@ -669,7 +678,28 @@ bool FloatNumber::ifNaN(FloatNumber number)
 
 bool FloatNumber::ifOne(FloatNumber number)
 {
-	return false;
+	
+	if (number.floatNumberBits[0] != 0b01111111)
+	{
+		return false;
+	}
+
+	for (int i = 1; i < s.getExponent(); i++)
+	{
+		if (number.floatNumberBits[i] != 255)
+		{
+			return false;
+		}
+	}
+
+	for (int i = s.getExponent(); i < s.getExponent() + s.getFraction(); i++)
+	{
+		if (number.floatNumberBits[i] != 0)
+			return false;
+	}
+
+
+	return true;
 }
 
 void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
@@ -709,28 +739,45 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 		this->setResultToInfinity();
 		return;
 	}
-
-
+	if (ifOne(numberA))
+	{
+		for (auto i : numberB.floatNumberBits)
+		{
+			this->floatNumberBits.push_back(i);
+		}
+		return;
+	}
+	if (ifOne(numberB))
+	{
+		for (auto i : numberA.floatNumberBits)
+		{
+			this->floatNumberBits.push_back(i);
+		}
+		return;
+	}
 
 	//mnozniki
 	std::vector<uint8_t> fracA;
 	std::vector<uint8_t> fracB;
 	std::vector<uint8_t> fracResult(s.getFraction() * 2 + 1, 0);		//inicjalizacja zerami
-	fracA.reserve(s.getFraction());
-	fracB.reserve(s.getFraction());
-	fracA.insert(fracA.begin(), numberA.floatNumberBits.begin() + s.getExponent(), numberA.floatNumberBits.end());
-	fracB.insert(fracB.begin(), numberB.floatNumberBits.begin() + s.getExponent(), numberB.floatNumberBits.end());
 	//wykladniki
 	std::vector<uint8_t> exponentA;
 	std::vector<uint8_t> exponentB;
 	std::vector<uint8_t> exponentResult(s.getExponent() + 1, 0);		//jeden dodatkowy bajt buforujacy
 	std::vector<uint8_t> exponentBias;								//obciazenie
-	exponentA.reserve(s.getExponent());
-	exponentB.reserve(s.getExponent());
-	exponentA.insert(exponentA.begin(), numberA.floatNumberBits.begin(), numberA.floatNumberBits.begin() + s.getExponent());
-	exponentB.insert(exponentB.begin(), numberB.floatNumberBits.begin(), numberB.floatNumberBits.begin() + s.getExponent());
+
+	for (int i = 0; i < s.getExponent(); i++)
+	{
+		exponentA.push_back(numberA.floatNumberBits[i]);
+		exponentB.push_back(numberB.floatNumberBits[i]);
+	}
 	exponentBias = generateBias();
 
+	for (int i = s.getExponent(); i < (s.getExponent() + s.getFraction()); i++)
+	{
+		fracA.push_back(numberA.floatNumberBits[i]);
+		fracB.push_back(numberB.floatNumberBits[i]);
+	}
 
 	uint8_t carryFromRl = 0, carryFromRr = 0, carryFromAdd = 0, carryFromSubb = 0; //bajty przeniesienia rotacji w lewo, rotacji w prawo, dodawanie bajtow, odejmowania
 
@@ -841,9 +888,6 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 	if (this->bitR)
 		fracResult[s.getFraction() + 1] -= 0b01000000;
 
-
-
-
 	this->bitS = false;
 	for (int i = s.getFraction() + 1; i < fracResult.size(); i++)
 	{
@@ -856,18 +900,12 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 
 	fracResult.erase(fracResult.begin());
 
-	while (fracResult.size() != s.getFraction())
-	{
-		fracResult.pop_back();
-
-	}
-
+	
 	for (auto i : exponentResult)
 		this->floatNumberBits.push_back(i);
 
 	for (auto i : fracResult)
 		this->floatNumberBits.push_back(i);
-
 }
 
 void FloatNumber::addition(FloatNumber numberA, FloatNumber numberB)
@@ -1278,17 +1316,27 @@ void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident
 		setResultToInfinity();
 		return;
 	}
+	if (ifOne(divisor))
+	{
+		for (auto i : divident.floatNumberBits)
+			this->floatNumberBits.push_back(i);
+		return;
+	}
 
 
+
+	
 	//wykladniki
 	std::vector<uint8_t> exponentDivident;	//wykladnik dzielnej
 	std::vector<uint8_t> exponentDivisor;	//wykladnik dzielnika
 	std::vector<uint8_t> exponentQuotient;	//wykladnik ilorazu
 
-	exponentDivident.reserve(s.getExponent());
-	exponentDivisor.reserve(s.getExponent());
-	exponentDivident.insert(exponentDivident.begin(), divident.floatNumberBits.begin(), divident.floatNumberBits.begin() + s.getExponent());
-	exponentDivisor.insert(exponentDivisor.begin(), divisor.floatNumberBits.begin(), divisor.floatNumberBits.begin() + s.getExponent());
+	for (int i = 0; i < s.getExponent(); i++)
+	{
+		exponentDivident.push_back(divident.floatNumberBits[i]);
+		exponentDivisor.push_back(divisor.floatNumberBits[i]);
+	}
+	
 	exponentQuotient = generateBias();
 	exponentQuotient.insert(exponentQuotient.begin(), 0b00000010);
 
@@ -1347,10 +1395,13 @@ void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident
 	std::vector<uint8_t> fracDivisor;		//mnoznik dzielnika 
 	std::vector<uint8_t> fracQuotient(s.getFraction() + 1);
 
-	fracDivident.reserve(s.getFraction());
-	fracDivisor.reserve(s.getFraction());
-	fracDivident.insert(fracDivident.begin(), divident.floatNumberBits.begin() + s.getExponent(), divident.floatNumberBits.end());
-	fracDivisor.insert(fracDivisor.begin(), divisor.floatNumberBits.begin() + s.getExponent(), divisor.floatNumberBits.end());
+
+	for (int i = s.getExponent(); i < (s.getExponent() + s.getFraction()); i++)
+	{
+		fracDivident.push_back(divident.floatNumberBits[i]);
+		fracDivisor.push_back(divisor.floatNumberBits[i]);
+	}
+
 	fracDivisor.insert(fracDivisor.begin(), 1);		//bajt z bitem ukrytym
 	fracDivident.insert(fracDivident.begin(), 1);
 
@@ -1467,8 +1518,6 @@ void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident
 		}
 
 	}
-
-
 	fracQuotient.erase(fracQuotient.begin());
 
 	for (auto i : exponentQuotient)
@@ -1482,11 +1531,10 @@ void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident
 FloatNumber::~FloatNumber()
 {
 
-	while (this->floatNumberBits.size() != 0)
+	while (floatNumberBits.size() > 0)
 	{
 		this->floatNumberBits.pop_back();
 	}
-	std::cout << "DESTRUKTOR" <<std::endl;
 
 	this->bitG = false;
 	this->bitR = false;
