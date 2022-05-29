@@ -11,25 +11,30 @@ ConsoleApp::ConsoleApp()
 
 void::ConsoleApp::choseOption()
 {
-	int menuNumber = 1;
-	std::cout << "Aplikacja wykorzystujaca biblioteke arytmetyki liczb zmiennoprzecinkowych" << std::endl << std::endl;
-	std::cout << "(1) Zmien opcje podawania liczb, Obecnie: ";
-	if (numberInput == 1)
-		std::cout << "Dziesietnie" << std::endl;
-	else
-		std::cout << "Zmienny przecinek" << std::endl;
-	std::cout << "(2) Zmien Standard, ";
-	displayCurrentStandard();
-	std::cout << "(3) Zmien schemat zaokraglania, Obecnie: ";
-	std::cout << "Obciecie" << std::endl;
-	std::cout << "(4) Dodawanie" << std::endl;
-	std::cout << "(5) Odejmowanie" << std::endl;
-	std::cout << "(6) Mnozenie" << std::endl;
-	std::cout << "(7) Dzielenie" << std::endl;
-	std::cout << "(8) Wyczysc ekran" << std::endl;
-	std::cout << "(0) Wyjscie" << std::endl;
 
-	
+		int menuNumber = 1;
+
+	while (menuNumber != 0)
+	{
+
+
+		std::cout << "Aplikacja wykorzystujaca biblioteke arytmetyki liczb zmiennoprzecinkowych" << std::endl << std::endl;
+		std::cout << "(1) Zmien opcje podawania liczb, Obecnie: ";
+		if (numberInput == 1)
+			std::cout << "Dziesietnie" << std::endl;
+		else
+			std::cout << "Zmienny przecinek" << std::endl;
+		std::cout << "(2) Zmien Standard, ";
+		displayCurrentStandard();
+		std::cout << "(3) Zmien schemat zaokraglania, Obecnie: ";
+		std::cout << "Obciecie" << std::endl;
+		std::cout << "(4) Dodawanie" << std::endl;
+		std::cout << "(5) Odejmowanie" << std::endl;
+		std::cout << "(6) Mnozenie" << std::endl;
+		std::cout << "(7) Dzielenie" << std::endl;
+		std::cout << "(8) Wyczysc ekran" << std::endl;
+		std::cout << "(0) Wyjscie" << std::endl;
+
 		do
 		{
 			std::cin >> menuNumber;
@@ -68,10 +73,12 @@ void::ConsoleApp::choseOption()
 			break;
 		case 8:
 			system("cls");
+			break;
 		}
 
-		if(menuNumber!=0)
-		choseOption();
+		
+
+	}
 }
 
 void::ConsoleApp::displayCurrentStandard()

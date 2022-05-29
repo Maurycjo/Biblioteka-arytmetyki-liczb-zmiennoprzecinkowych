@@ -10,13 +10,19 @@
 int main()
 {
 
-	//ConsoleApp consoleapp;
+	ConsoleApp consoleapp;
 
 
-	Standard s(1, 1);
+	Standard s(2, 2);
 	FloatNumber number;
 	number.setStandard(s);
-	number.dec2float(1);
+	number.dec2float(2);
+
+	if (number.ifOne(number))
+		std::cout << "prawda\n";
+	else
+		std::cout << "nieprawda\n";
+
 	number.displayNumberBinary();
 
 	return 0;
