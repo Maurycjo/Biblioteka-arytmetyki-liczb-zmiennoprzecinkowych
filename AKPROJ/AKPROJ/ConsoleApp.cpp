@@ -134,7 +134,7 @@ void::ConsoleApp::addNumbers()
 	std::cout << "Schemat zaokraglania: Obciecie" << std::endl;
 	enterNumbers();
 	result.addition(numberA, numberB);	//to bedzie dodawanie nie mnozenie
-	std::cout << "Suma: ";
+	std::cout << "Suma:     ";
 	result.displayNumberBinary();
 }
 
@@ -143,7 +143,7 @@ void::ConsoleApp::subbNumbers()
 	std::cout << "Schemat zaokraglania: Obciecie" << std::endl;
 	enterNumbers();
 	result.multiply(numberA, numberB);	//to bedzie odejmowanie nie mnozenie
-	std::cout << "Roznica: ";
+	std::cout << "Roznica:  ";
 	result.displayNumberBinary();
 }
 
@@ -152,7 +152,8 @@ void::ConsoleApp::mulNumbers()
 	std::cout << "Schemat zaokraglania: Obciecie" << std::endl;
 	enterNumbers();
 	result.multiply(numberA, numberB);
-	std::cout << "Iloczyn: ";
+
+	std::cout << "Iloczyn:  ";
 	result.displayNumberBinary();
 }
 
@@ -161,7 +162,7 @@ void::ConsoleApp::divNumbers()
 	std::cout << "Schemat zaokraglania: Obciecie" << std::endl;
 	enterNumbers();
 	result.division(numberA, numberB);
-	std::cout << "Iloraz: ";
+	std::cout << "Iloraz:   ";
 	result.displayNumberBinary();
 }
 
