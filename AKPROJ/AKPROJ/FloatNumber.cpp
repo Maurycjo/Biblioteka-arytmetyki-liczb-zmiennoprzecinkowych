@@ -921,11 +921,7 @@ void FloatNumber::addition(FloatNumber numberA, FloatNumber numberB)
 	std::vector<uint8_t> fracA;
 	std::vector<uint8_t> fracB;
 	std::vector<uint8_t> fractResult(s.getFraction() + 1, 0);
-	fracA.reserve(s.getFraction());
-	fracB.reserve(s.getFraction());
-	fracA.insert(fracA.begin(), numberA.floatNumberBits.begin() + s.getExponent(), numberA.floatNumberBits.end());
-	fracB.insert(fracB.begin(), numberB.floatNumberBits.begin() + s.getExponent(), numberB.floatNumberBits.end());
-	std::cout << "SIZECHECK!!!: " << fracA.size() << std::endl;
+
 	// wykladniki
 	std::vector<uint8_t> exponentA;
 	std::vector<uint8_t> exponentB;
@@ -933,11 +929,22 @@ void FloatNumber::addition(FloatNumber numberA, FloatNumber numberB)
 	std::vector<uint8_t> exponentDiff(s.getExponent(), 0);
 	std::vector<uint8_t> exponentResult;
 
-	exponentA.reserve(s.getExponent());
-	exponentB.reserve(s.getExponent());
-	exponentA.insert(exponentA.begin(), numberA.floatNumberBits.begin(), numberA.floatNumberBits.begin() + s.getExponent());
-	exponentB.insert(exponentB.begin(), numberB.floatNumberBits.begin(), numberB.floatNumberBits.begin() + s.getExponent());
+	for (int i = 0; i < s.getExponent(); i++)
+	{
+		exponentA.push_back(numberA.floatNumberBits[i]);
+		exponentB.push_back(numberB.floatNumberBits[i]);
+	}
 	exponentBias = generateBias();
+
+	for (int i = s.getExponent(); i < (s.getExponent() + s.getFraction()); i++)
+	{
+		fracA.push_back(numberA.floatNumberBits[i]);
+		fracB.push_back(numberB.floatNumberBits[i]);
+	}
+
+	std::cout << "SIZECHECK!!!: " << fracA.size() << std::endl;
+
+
 
 	fracB.push_back(0); // przygotowanie bajtu aby trzymac w nim GRS
 	fracA.push_back(0);
