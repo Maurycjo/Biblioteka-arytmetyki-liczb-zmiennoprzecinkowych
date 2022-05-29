@@ -40,7 +40,7 @@ public:
 	void division(FloatNumber number1, FloatNumber number2);					//dzielenie liczb w standardzie
 	~FloatNumber();
 	void addition(FloatNumber number1, FloatNumber number2);				//dodawanie liczb w standardzie
-	bool ifOne(FloatNumber number);												//sprawdzenie czy liczba jest rowna 1
+	
 	
 };
 

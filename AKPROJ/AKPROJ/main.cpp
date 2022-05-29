@@ -10,7 +10,7 @@
 int main()
 {
 
-	//ConsoleApp consoleapp;
+	ConsoleApp consoleapp;
 
 
 	Standard s(1, 1);
