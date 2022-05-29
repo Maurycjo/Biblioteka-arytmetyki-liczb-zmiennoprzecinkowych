@@ -169,6 +169,7 @@ void::ConsoleApp::divNumbers()
 void::ConsoleApp::enterNumbers()
 {
 	long double A, B;
+	std::string strA, strB;
 
 	displayCurrentStandard();
 	this->numberA.setStandard(this->s);
@@ -185,11 +186,12 @@ void::ConsoleApp::enterNumbers()
 	else
 	{
 		std::cout << "w zmiennym przecinku" << std::endl;
-		/*
-		
-		metoda pobierajaca string bitow
-		*/ 
-
+		std::cin >> A;
+		std::cin >> B;
+		numberA.string2float(strA);
+		numberB.string2float(strB);
+	
+			
 	}
 
 	std::cout << "Przekonwertowano" << std::endl;
