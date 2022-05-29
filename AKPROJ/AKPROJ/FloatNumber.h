@@ -33,7 +33,7 @@ public:
 	void setStandard(Standard s);												//ustawienie standardu
 	void dec2float_alpha(double inputNumber);									//konwersja na liczbe FloatNumber
 	void dec2float(double inputNumber);											//konwersja na liczbe FloatNumber
-	bool string2float(std::string inputNumber);										//konwersja ciagu bitow na liczbe w standardzie
+	void string2float(std::string inputNumber);										//konwersja ciagu bitow na liczbe w standardzie
 	void displayNumberBinary();													//wyswietlenie liczby w formacie binarnym	
 	void multiply(FloatNumber number1, FloatNumber number2);					//mnozenie liczb w standardzie
 	void division(FloatNumber number1, FloatNumber number2);					//dzielenie liczb w standardzie

@@ -23,7 +23,7 @@ void FloatNumber::dec2float(double inputNumber)
 		return;
 	}
 
-	std::vector<uint8_t> fracTab(s.getFraction()+1, 0);
+	std::vector<uint8_t> fracTab(s.getFraction()+2, 0);
 	std::vector<uint8_t> expTab = generateBias();
 	expTab.insert(expTab.begin(), 0);
 	uint8_t carryFromAdd = 0, carryFromRot = 0, carryFromSubb = 0;
@@ -87,11 +87,9 @@ void FloatNumber::dec2float(double inputNumber)
 		rlcSevBytes(fracTab, carryFromRot);
 		carryFromRot = 0;
 		rlcSevBytes(fracTab, carryFromRot);
-
 	}
 	else
 	{
-		
 		while (afterTheDecPoint<1 && !denormalized)
 		{
 
@@ -129,6 +127,48 @@ void FloatNumber::dec2float(double inputNumber)
 
 	expTab.erase(expTab.begin());
 	fracTab.pop_back();
+
+
+	uint8_t grsBits = fracTab[fracTab.size() - 1];
+
+	if ((0b10000000 & grsBits) == 0b10000000)
+		this->bitG = true;
+
+	if ((0b01000000 & grsBits) == 0b01000000)
+		this->bitR = true;
+
+	if (this->bitG)
+		grsBits-= 0b10000000;
+	if (this->bitR)
+		grsBits-= 0b01000000;
+
+	this->bitS = false;
+	if (grsBits != 0)
+	{
+		this->bitS = true;
+	}
+	else if (tempNumber > 0 || afterTheDecPoint > 0)
+	{
+		this->bitS = true;
+	}
+	else
+	{
+		this->bitS = false;
+	}
+
+	std::cout << "GRS: " << int(bitG) << int(bitR) << int(bitS);
+
+	std::cout << "temp" << tempNumber << std::endl;
+	std::cout << "frac" << afterTheDecPoint<< std::endl;
+
+	for (auto i : fracTab)
+	{
+		std::cout << std::bitset<8>(i) << " ";
+	}
+	std::cout << std::endl;
+
+
+
 
 	this->floatNumberBits.reserve(expTab.size() + fracTab.size());
 	this->floatNumberBits.insert(floatNumberBits.end(), expTab.begin(), expTab.end());
@@ -327,7 +367,7 @@ void FloatNumber::dec2float_alpha(double inputNumber)
 	
 }
 
-bool FloatNumber::string2float(std::string inputNumber)
+void FloatNumber::string2float(std::string inputNumber)
 {
 
 	uint8_t carry = 0;
@@ -356,12 +396,8 @@ bool FloatNumber::string2float(std::string inputNumber)
 			{
 				carry = 0;
 				rlcSevBytes(floatNumberBits, carry);
-
 			}
-
-			return true;
 		}
-
 		
 		if (inputNumber[x] == '1')
 		{
@@ -382,12 +418,11 @@ bool FloatNumber::string2float(std::string inputNumber)
 		}
 		else if (inputNumber[x] != '1' && inputNumber[x] != '0')
 		{
-			return false;
+			setResultToNaN();
 		}
 		x++;
 	}
 
-	return true;
 }
 
 void FloatNumber::displayNumberBinary()
@@ -585,6 +620,12 @@ void FloatNumber::setResultToZero()
 
 void FloatNumber::setResultToNaN()
 {
+
+	while (this->floatNumberBits.size()>0)
+	{
+		this->floatNumberBits.pop_back();
+	}
+
 	for (int i = 0; i < s.getExponent(); i++)
 		this->floatNumberBits.push_back(255);
 
@@ -1171,8 +1212,7 @@ void FloatNumber::getGRS(std::vector<uint8_t> bytes)
 		for (int i = s.getFraction() + 1; i < bytes.size(); i++)
 		{
 			bitS = bytes[i];
-			if (bitS)
-				;
+			if (bitS);
 			break;
 		}
 	}
