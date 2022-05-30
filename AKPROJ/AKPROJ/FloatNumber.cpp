@@ -671,13 +671,6 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 		fracA.insert(fracA.begin(), 0);		//do przeskalowywania tej liczby potrzebne dwa razy wiecej bajtow
 	}
 
-
-
-	for (auto i : fracB)
-		std::cout << std::bitset<8>(i) << " ";
-	std::cout << std::endl;
-
-
 	//algortym realizujacy wytworzenie bajtow mnoznika wyniku
 	bool ifFracBZero = false;
 	while (!ifFracBZero)
@@ -1034,7 +1027,7 @@ void FloatNumber::round(roundType type)
 	case TOWARD_ZERO:
 		return;
 	case TOWARD_PLUS_INF:
-		if ((bitR == 1 || bitS == 1) && this->sign == false)
+		if ((bitR == 1 || bitS == 1) && (this->sign == false))
 		{
 			incSevBytes(this->floatNumberBits);
 		}
