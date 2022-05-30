@@ -10,10 +10,17 @@
 int main()
 {
 
+	std::string konwert = "0|011000";
+	FloatNumber number;
+	Standard s(1, 1);
+	number.setStandard(s);
+	number.string2float(konwert);
+	number.displayNumberBinary();
+	std::cout << std::endl;
+	std::cout << "GRS: " << int(number.bitG) << int(number.bitR) << int(number.bitS) << std::endl;
 
-	
 
-	ConsoleApp consoleapp;
+
 
 
 

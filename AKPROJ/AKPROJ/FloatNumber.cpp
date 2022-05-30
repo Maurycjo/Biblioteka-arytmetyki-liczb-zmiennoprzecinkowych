@@ -180,6 +180,10 @@ void FloatNumber::string2float(std::string inputNumber)
 
 	uint8_t carry = 0;
 
+	bitG = false;
+	bitR = false;
+	bitS = false;
+
 	if (inputNumber[0] == '0')
 	{
 		this->sign = false;
@@ -205,6 +209,8 @@ void FloatNumber::string2float(std::string inputNumber)
 				carry = 0;
 				rlcSevBytes(floatNumberBits, carry);
 			}
+
+			return;
 		}
 		
 		if (inputNumber[x] == '1')
@@ -227,7 +233,53 @@ void FloatNumber::string2float(std::string inputNumber)
 		else if (inputNumber[x] != '1' && inputNumber[x] != '0')
 		{
 			setResultToNaN();
+			return;
 		}
+		x++;
+	}
+
+	bitS = false;
+	int k = 0;
+	while (inputNumber[x] != '\0')
+	{
+		if (inputNumber[x] != ' ' && inputNumber[x] != '|' && inputNumber[x] != '1' && inputNumber[x] != '0')
+		{
+			setResultToNaN();
+			return;
+
+		}
+		else if (inputNumber[x] == ' ' || inputNumber[x] == '|')
+		{
+			k--;
+
+		}
+		else if (k == 0)
+		{
+			if (inputNumber[x] == '1')
+			{
+				bitG = true;
+			}
+			else
+				bitG = false;
+		}
+		else if (k == 1)
+		{
+			if (inputNumber[x] == '1')
+			{
+				bitR = true;
+			}
+			else
+				bitR = false;
+		}
+		else if (k > 1)
+		{
+			if (inputNumber[x] == '1')
+			{
+				bitS = true;
+				return;
+			}
+		}
+		k++;
 		x++;
 	}
 
@@ -992,13 +1044,15 @@ void FloatNumber::addition(FloatNumber numberA, FloatNumber numberB)
 	fracB.erase(fracB.begin(),fracB.end());
 }
 
-void FloatNumber::round(std::vector<uint8_t>& bytes, roundType type)
+bool FloatNumber::round_alpha(std::vector<uint8_t>& bytes, roundType type)
 {
 	uint8_t carryFromAdd = 0;
 
 	switch (type)
 	{
 	case TO_NEAREST_TIES_AWAY_FROM_ZERO: // Zaokraglenie symetrycznie do parzystej
+		std::cout << "parzysta\n";
+
 		if (!bitG && !bitR)
 			break;
 		else if (bitG)
@@ -1010,8 +1064,9 @@ void FloatNumber::round(std::vector<uint8_t>& bytes, roundType type)
 					break;
 			}
 		if (carryFromAdd)
+		{
 			setResultToInfinity();
-		std::cout << "parzysta\n";
+		}
 		break;
 	case TO_NEAREST_TIES_TO_EVEN: // zaokraglenie symetryczne do wiekszej wartosci bezwzglednej
 		if (!bitG && !bitR)
@@ -1025,7 +1080,9 @@ void FloatNumber::round(std::vector<uint8_t>& bytes, roundType type)
 					break;
 			}
 		if (carryFromAdd)
+		{
 			setResultToInfinity();
+		}
 		std::cout << "parzysta bezw\n";
 		break;
 
@@ -1040,7 +1097,9 @@ void FloatNumber::round(std::vector<uint8_t>& bytes, roundType type)
 					break;
 			}
 		if (carryFromAdd)
+		{
 			setResultToInfinity();
+		}
 		else
 			break;
 		std::cout << "minus inf\n";
@@ -1065,7 +1124,10 @@ void FloatNumber::round(std::vector<uint8_t>& bytes, roundType type)
 					break;
 			}
 			if (carryFromAdd)
+			{
 				setResultToInfinity();
+				return true;
+			}
 		}
 		std::cout << "+ inf\n";
 		break;
@@ -1079,6 +1141,60 @@ void FloatNumber::round(std::vector<uint8_t>& bytes, roundType type)
 
 
 	std::cout<<"in round: " << type << std::endl;
+}
+
+void FloatNumber::round(roundType type)
+{
+	bitS = (bitR || bitS);
+	bitR = bitG;
+
+	if (bitR == 0 && bitS == 0)
+		return;
+	
+	switch (type)
+	{
+
+	case TOWARD_ZERO:	//do zera
+		return;
+	case TOWARD_PLUS_INF:
+		if ((bitR == 1 || bitS == 1)&&this->sign==false)
+		{
+			incSevBytes(this->floatNumberBits);
+		}
+		return;
+	case TOWARD_MINUS_INF:
+		if ((bitR == 1 || bitS == 1) && this->sign == true)
+		{
+			incSevBytes(this->floatNumberBits);
+		}
+		return;
+
+	case TO_NEAREST_TIES_TO_EVEN:	//sym do wiekszej bezw
+
+		if (bitR == true && bitS == true)
+		{
+			incSevBytes(this->floatNumberBits);
+		}
+		else if (bitR == true && bitS == false)
+		{
+			incSevBytes(this->floatNumberBits);
+		}
+		return;
+
+	case TO_NEAREST_TIES_AWAY_FROM_ZERO:
+
+		if (bitR == true && bitS == true)
+		{
+			incSevBytes(this->floatNumberBits);
+		}
+		
+		else if (bitR == true && bitS == false && ((this->floatNumberBits.back())%2)==1)
+		{
+			incSevBytes(this->floatNumberBits);
+
+		}
+		return;
+	}
 
 }
 
@@ -1347,6 +1463,9 @@ void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident
 
 	}
 	fracQuotient.erase(fracQuotient.begin());
+
+
+	
 
 	for (auto i : exponentQuotient)
 		this->floatNumberBits.push_back(i);

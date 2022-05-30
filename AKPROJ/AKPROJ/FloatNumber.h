@@ -10,7 +10,6 @@ private:
 	Standard s;
 	roundType type = TOWARD_ZERO;
 	bool sign;
-	bool bitG = 0, bitR = 0, bitS = 0;
 	std::vector<uint8_t> floatNumberBits;										//vector liczby w standardzie
 	void setResultToInfinity();													//ustawienie liczby w standardzie na nieskonczonosc
 	void setResultToZero();														//ustawienie liczby w standardzie na 0
@@ -31,7 +30,9 @@ private:
 	void getGRS(std::vector<uint8_t> bytes);
 	void prepGRS(std::vector<uint8_t>& bytes);									//Przygotowuje bity GRS do obliczen
 public:
-	void round(std::vector<uint8_t>& bytes, roundType type);
+	bool bitG = 0, bitR = 0, bitS = 0;
+	bool round_alpha(std::vector<uint8_t>& bytes, roundType type);
+	void round(roundType type);
 	void setStandard(Standard s);												//ustawienie standardu
 	void dec2float(double inputNumber);											//konwersja na liczbe FloatNumber
 	void string2float(std::string inputNumber);										//konwersja ciagu bitow na liczbe w standardzie
