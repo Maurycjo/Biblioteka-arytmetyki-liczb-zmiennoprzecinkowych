@@ -175,196 +175,6 @@ void FloatNumber::dec2float(double inputNumber)
 
 }
 
-void FloatNumber::dec2float_alpha(double inputNumber)
-{
-
-	//zero
-	if (inputNumber == 0)
-	{
-		this->setResultToZero();
-		this->sign = false;
-		return;
-	}
-
-
-	std::vector<uint8_t> fracTab;						//vector mnoznika
-	std::vector<uint8_t> expTab;						//vector wykladnika 
-
-	uint8_t byte = 0b00000000;							//bajt do zapisu do vectora
-	uint8_t byteIterator = 0b10000000;					//bajt do zwiekszania bajtu
-
-	int expBias = pow(2, (s.getExponent()*8 - 1)) - 1;	//obciazenie wykladnika		
-	int expMaxRange = pow(2, s.getExponent()*8)-2-expBias;//maksymalna warosc wykladnika 
-	int expMinRange = 1 - expBias;						//min wartosc wykladnika
-	bool denormalized = false;							//czy liczba zdenormalizowana
-
-	if (inputNumber < 0)
-	{
-		this->sign = 1;		//liczba ujemna
-		inputNumber *= -1;
-	}
-	else
-		this->sign = 0;		//liczba dodatnia
-
-
-	int number = inputNumber;							//czesc calkowita liczby
-	float afterTheDecPoint = inputNumber - number;		//czesc przecinkowa liczby
-	int decPlace = 0;									//miejsce przecinka, wykladnik
-	int tempNumber = number;							//liczba pomocnicza
-	int fracIterator = 0;								//iterator po mnozniku
-
-	
-
-
-	while (tempNumber > 0 && decPlace!=expMaxRange+1)
-	{
-		tempNumber /= 2;
-		decPlace++;
-	}
-
-	//nieskonoczonosc 
-	if (decPlace > expMaxRange)
-	{
-		this->setResultToInfinity();
-		return;
-	}
-
-	if (decPlace > 0)
-	{
-		decPlace--;
-		
-		if (number / int(pow(2, decPlace)) == 1)
-		{
-			number = number - pow(2, decPlace);	
-		}	
-
-		//konwersja czesci calkowitej, tylko wtedy kiedy ta czesc calkowita istnieje
-		for (int i = 0; i < decPlace; i++)
-		{
-		
-			if(number/int(pow(2, decPlace-i-1))==1)
-			{
-				//std::cout << "tuatj\n";
-				number = number - int(pow(2, decPlace-i-1));
-				byte += byteIterator;
-			}
-
-			byteIterator>>= 1;
-
-			if (byteIterator == 0b00000000)
-			{
-				fracTab.push_back(byte);
-				byteIterator = 0b10000000;
-				byte = 0;
-			}
-			fracIterator++;
-		}
-	}
-	else //przypadek kiedy liczba <1, wtedy tez trzeba ustalic czy liczbe trzeba zdenormalizowac
-	{
-		
-		//ustalenie miejsca przecinka
-		while (afterTheDecPoint < 1)
-		{
-			afterTheDecPoint *= 2;
-			decPlace--;
-			if (decPlace == expMinRange)
-			{
-				denormalized = true;
-				decPlace--;
-				break;
-			}
-		}
-	
-		//pierwszy bit jest ukryty
-		if(!denormalized)
-		afterTheDecPoint -= 1;
-
-	}
-	//konwersja czesci przecinkowej
-	while ((fracIterator < s.getFraction() * 8)&&afterTheDecPoint!=0)
-	{
-		afterTheDecPoint *= 2;
-		if (afterTheDecPoint >= 1)
-		{
-			byte += byteIterator;
-			afterTheDecPoint -= 1;
-		}
-
-		byteIterator >>= 1;
-
-		if (byteIterator == 0)
-		{
-			fracTab.push_back(byte);
-			byte = 0;
-			byteIterator = 0b10000000;
-		}
-		fracIterator++;
-	}
-
-	if (fracIterator < s.getFraction()*8)
-	{
-		fracTab.push_back(byte);
-		byte = 0;
-	}
-	while (fracTab.size() != s.getFraction())
-	{
-		fracTab.push_back(0);
-	}
-
-	// konwersja wykladnika
-	byte = 0;
-	byteIterator = 0b00000001;
-
-	//std::cout << "wykladnik: " << decPlace << std::endl;
-
-
-	if (decPlace > expMaxRange)
-	{
-		this->setResultToInfinity();
-		return;
-	}
-	decPlace += expBias;
-
-	while (decPlace>0)
-	{
-
-		if (decPlace % 2 == 1)
-		{
-			byte += byteIterator;
-		}
-
-		byteIterator <<= 1;
-		if (byteIterator == 0)
-		{
-			expTab.insert(expTab.begin(), byte);
-			byte = 0;
-			byteIterator = 0b00000001;
-
-		}
-		decPlace /= 2;
-	}
-
-	if (byteIterator != 1)
-	{
-		expTab.insert(expTab.begin(), byte);
-	}
-	while (expTab.size() != s.getExponent())
-	{
-		expTab.insert(expTab.begin(), 0);
-	}
-
-
-	this->floatNumberBits.reserve(expTab.size() + fracTab.size());
-	this->floatNumberBits.insert(floatNumberBits.end(), expTab.begin(), expTab.end());
-	this->floatNumberBits.insert(floatNumberBits.end(), fracTab.begin(), fracTab.end());
-
-	
-	if(denormalized)
-	std::cout << "\ndenormalized"<< std::endl;
-	
-}
-
 void FloatNumber::string2float(std::string inputNumber)
 {
 
@@ -706,6 +516,9 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 {
 	//M1 *2^E1* M2*2E2=(M1*M2)*2^(E1+E2)
 
+	this->bitG = false;
+	this->bitR = false;
+	this->bitS = false;
 	this->setStandard(numberA.s);
 
 	//0*INFINITY
@@ -1179,13 +992,13 @@ void FloatNumber::addition(FloatNumber numberA, FloatNumber numberB)
 	fracB.erase(fracB.begin(),fracB.end());
 }
 
-void FloatNumber::round(std::vector<uint8_t>& bytes, Standard::roundType round_type)
+void FloatNumber::round(std::vector<uint8_t>& bytes, roundType type)
 {
 	uint8_t carryFromAdd = 0;
 
-	switch (round_type)
+	switch (type)
 	{
-	case Standard::roundType::TO_NEAREST_TIES_AWAY_FROM_ZERO: // Zaokraglenie symetrycznie do parzystej
+	case TO_NEAREST_TIES_AWAY_FROM_ZERO: // Zaokraglenie symetrycznie do parzystej
 		if (!bitG && !bitR)
 			break;
 		else if (bitG)
@@ -1198,9 +1011,9 @@ void FloatNumber::round(std::vector<uint8_t>& bytes, Standard::roundType round_t
 			}
 		if (carryFromAdd)
 			setResultToInfinity();
-
+		std::cout << "parzysta\n";
 		break;
-	case Standard::roundType::TO_NEAREST_TIES_TO_EVEN: // zaokraglenie symetryczne do wiekszej wartosci bezwzglednej
+	case TO_NEAREST_TIES_TO_EVEN: // zaokraglenie symetryczne do wiekszej wartosci bezwzglednej
 		if (!bitG && !bitR)
 			break;
 
@@ -1213,9 +1026,10 @@ void FloatNumber::round(std::vector<uint8_t>& bytes, Standard::roundType round_t
 			}
 		if (carryFromAdd)
 			setResultToInfinity();
+		std::cout << "parzysta bezw\n";
 		break;
 
-	case Standard::roundType::TOWARD_MINUS_INF:
+	case TOWARD_MINUS_INF:
 		if (!bitG && !bitR)
 			break;
 		else if (sign)
@@ -1229,9 +1043,10 @@ void FloatNumber::round(std::vector<uint8_t>& bytes, Standard::roundType round_t
 			setResultToInfinity();
 		else
 			break;
+		std::cout << "minus inf\n";
 		break;
 
-	case Standard::roundType::TOWARD_PLUS_INF:
+	case TOWARD_PLUS_INF:
 		if (!bitG && !bitR)
 		{
 			break;
@@ -1252,15 +1067,19 @@ void FloatNumber::round(std::vector<uint8_t>& bytes, Standard::roundType round_t
 			if (carryFromAdd)
 				setResultToInfinity();
 		}
-
+		std::cout << "+ inf\n";
 		break;
 
-	case Standard::roundType::TOWARD_ZERO:
+	case TOWARD_ZERO:
 		break;
 	default:
 		std::cout << "Cos jest nie tak" << std::endl;
 		break;
 	}
+
+
+	std::cout<<"in round: " << type << std::endl;
+
 }
 
 void FloatNumber::getGRS(std::vector<uint8_t> bytes)
@@ -1286,7 +1105,9 @@ void FloatNumber::getGRS(std::vector<uint8_t> bytes)
 void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident=dzielna, divisor=dzielnik
 {
 	// M1/M2*2^(E1-E2)
-
+	this->bitG = false;
+	this->bitR = false;
+	this->bitS = false;
 	this->setStandard(divident.s);
 
 	// 0/0
@@ -1563,4 +1384,21 @@ void FloatNumber::prepGRS(std::vector<uint8_t> &bytes)
 		byte = byte | 0b00100000;
 
 	bytes[s.getFraction()] = byte;
+}
+
+void FloatNumber::signNegation()
+{
+	this->sign = !(this->sign);
+}
+
+void FloatNumber::setRoundType(roundType type)
+{
+
+	this->type = type;
+
+}
+
+roundType FloatNumber::getRoundType()
+{
+	return type;
 }

@@ -14,11 +14,13 @@ private:
 	void displayCurrentStandard();
 	void setStandard();
 	void setNumberInput();
-	void addNumbers(FloatNumber numberA, FloatNumber numberB, FloatNumber result);
-	void subbNumbers(FloatNumber numberA, FloatNumber numberB, FloatNumber result);
-	void divNumbers(FloatNumber numberA, FloatNumber numberB, FloatNumber result);
-	void mulNumbers(FloatNumber numberA, FloatNumber numberB, FloatNumber result);
-	void enterNumbers(FloatNumber &numberA, FloatNumber &numberB);
+	void addNumbers(roundType type, FloatNumber numberA, FloatNumber numberB, FloatNumber result);
+	void subbNumbers(roundType type, FloatNumber numberA, FloatNumber numberB, FloatNumber result);
+	void divNumbers(roundType type, FloatNumber numberA, FloatNumber numberB, FloatNumber result);
+	void mulNumbers(roundType type, FloatNumber numberA, FloatNumber numberB, FloatNumber result);
+	void enterNumbers(roundType type, FloatNumber &numberA, FloatNumber &numberB);
+	void setRoundType(roundType& type, FloatNumber& numberA, FloatNumber& numberB, FloatNumber& result);
+	void displayCurrentRoundType(roundType type);
 public:
 
 	ConsoleApp();

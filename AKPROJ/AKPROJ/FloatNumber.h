@@ -8,6 +8,7 @@ class FloatNumber
 {
 private:
 	Standard s;
+	roundType type = TOWARD_ZERO;
 	bool sign;
 	bool bitG = 0, bitR = 0, bitS = 0;
 	std::vector<uint8_t> floatNumberBits;										//vector liczby w standardzie
@@ -27,20 +28,21 @@ private:
 	void incSevBytes(std::vector<uint8_t>& number);								//inkrementacja bez przeniesienia vektora bajtow
 	void decSevBytes(std::vector<uint8_t>& number);								//dekrementacja bez przeniesienia vektora bajtow
 	std::vector<uint8_t> generateBias();										//generowanie obciazenia wykladnika
-	void round(std::vector<uint8_t>& bytes, Standard::roundType round_type);
 	void getGRS(std::vector<uint8_t> bytes);
 	void prepGRS(std::vector<uint8_t>& bytes);									//Przygotowuje bity GRS do obliczen
 public:
+	void round(std::vector<uint8_t>& bytes, roundType type);
 	void setStandard(Standard s);												//ustawienie standardu
-	void dec2float_alpha(double inputNumber);									//konwersja na liczbe FloatNumber
 	void dec2float(double inputNumber);											//konwersja na liczbe FloatNumber
 	void string2float(std::string inputNumber);										//konwersja ciagu bitow na liczbe w standardzie
 	void displayNumberBinary();													//wyswietlenie liczby w formacie binarnym	
 	void multiply(FloatNumber number1, FloatNumber number2);					//mnozenie liczb w standardzie
 	void division(FloatNumber number1, FloatNumber number2);					//dzielenie liczb w standardzie
 	~FloatNumber();
-	void addition(FloatNumber number1, FloatNumber number2);				//dodawanie liczb w standardzie
-	
+	void addition(FloatNumber number1, FloatNumber number2);					//dodawanie liczb w standardzie
+	void signNegation();														//negacja znaku liczby
+	void setRoundType(roundType type);
+	roundType getRoundType();
 	
 };
 
