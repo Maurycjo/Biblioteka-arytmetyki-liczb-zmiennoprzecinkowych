@@ -42,10 +42,8 @@ public:
 	void addition(FloatNumber number1, FloatNumber number2);					//dodawanie liczb w standardzie
 	void signNegation();														//negacja znaku liczby
 	void setRoundType(roundType type);											//ustawienie trybu zaokraglenia
-	roundType getRoundType();													//zwrocenie tryby zaokraglenia
-	~FloatNumber();
-	void addition(FloatNumber number1, FloatNumber number2);				//dodawanie liczb w standardzie
-	std::vector<uint8_t> get_bits_for_testing();			//do testow
+	roundType getRoundType();													//zwrocenie tryby zaokraglenia;
+	std::vector<uint8_t> get_bits_for_testing();								//do testow
 	bool get_sign();
 	
 	
