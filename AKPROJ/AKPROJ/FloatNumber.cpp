@@ -130,7 +130,6 @@ void FloatNumber::dec2float(double inputNumber)
 
 
 	uint8_t grsBits = fracTab[fracTab.size() - 1];
-	std::cout<< int(grsBits)<<std::endl;
 
 	if ((0b10000000 & grsBits) == 0b10000000){
 		
@@ -677,14 +676,23 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 		fracA.insert(fracA.begin(), 0);		//do przeskalowywania tej liczby potrzebne dwa razy wiecej bajtow
 	}
 
+
+
+	for (auto i : fracB)
+		std::cout << std::bitset<8>(i) << " ";
+	std::cout << std::endl;
+
+
 	//algortym realizujacy wytworzenie bajtow mnoznika wyniku
-	for (int i = 0; i < (s.getFraction() + 1) * 8; i++)
+	bool ifFracBZero = false;
+	while (!ifFracBZero)
 	{
 		carryFromRr = 0;
 		rrcSevBytes(fracB, carryFromRr);
 
 		if (carryFromRr == 1)
 		{
+			
 			carryFromAdd = 0;
 			for (int j = s.getFraction() * 2; j >= 0; j--)
 			{
@@ -693,6 +701,18 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 		}
 		carryFromRl = 0;
 		rlcSevBytes(fracA, carryFromRl);
+
+		ifFracBZero = true;
+
+		for (auto i : fracB)
+		{
+			if (i != 0)
+			{
+				ifFracBZero = false;
+				break;
+			}
+		}
+
 	}
 
 	carryFromRl = 0;
@@ -764,7 +784,6 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 
 	fracResult.erase(fracResult.begin());
 
-	
 	for (auto i : exponentResult)
 		this->floatNumberBits.push_back(i);
 
@@ -1043,105 +1062,6 @@ void FloatNumber::addition(FloatNumber numberA, FloatNumber numberB)
 	fracB.erase(fracB.begin(),fracB.end());
 }
 
-bool FloatNumber::round_alpha(std::vector<uint8_t>& bytes, roundType type)
-{
-	uint8_t carryFromAdd = 0;
-
-	switch (type)
-	{
-	case TO_NEAREST_TIES_AWAY_FROM_ZERO: // Zaokraglenie symetrycznie do parzystej
-		std::cout << "parzysta\n";
-
-		if (!bitG && !bitR)
-			break;
-		else if (bitG)
-
-			for (int i = (s.getFraction() - 1); i >= 0; i--) // Sprawdzam czy po inkrementacji nie zaokraglimy do nieskonczonosci
-			{
-				bytes[i] = addTwoBytes(bytes[i], 1, carryFromAdd);
-				if (carryFromAdd == 0)
-					break;
-			}
-		if (carryFromAdd)
-		{
-			setResultToInfinity();
-		}
-		break;
-	case TO_NEAREST_TIES_TO_EVEN: // zaokraglenie symetryczne do wiekszej wartosci bezwzglednej
-		if (!bitG && !bitR)
-			break;
-
-		else
-			for (int i = (s.getFraction() - 1); i >= 0; i--) // Sprawdzam czy po inkrementacji nie zaokraglimy do nieskonczonosci
-			{
-				bytes[i] = addTwoBytes(bytes[i], 1, carryFromAdd);
-				if (carryFromAdd == 0)
-					break;
-			}
-		if (carryFromAdd)
-		{
-			setResultToInfinity();
-		}
-		std::cout << "parzysta bezw\n";
-		break;
-
-	case TOWARD_MINUS_INF:
-		if (!bitG && !bitR)
-			break;
-		else if (sign)
-			for (int i = (s.getFraction() - 1); i >= 0; i--) // Sprawdzam czy po inkrementacji nie zaokraglimy do nieskonczonosci
-			{
-				bytes[i] = addTwoBytes(bytes[i], 1, carryFromAdd);
-				if (carryFromAdd == 0)
-					break;
-			}
-		if (carryFromAdd)
-		{
-			setResultToInfinity();
-		}
-		else
-			break;
-		std::cout << "minus inf\n";
-		break;
-
-	case TOWARD_PLUS_INF:
-		if (!bitG && !bitR)
-		{
-			break;
-		}
-		else if (sign)
-		{
-
-			break;
-		}
-		else
-		{
-			for (int i = (s.getFraction() - 1); i >= 0; i--) // Sprawdzam czy po inkrementacji nie zaokraglimy do nieskonczonosci
-			{
-				bytes[i] = addTwoBytes(bytes[i], 1, carryFromAdd);
-				if (carryFromAdd == 0)
-					break;
-			}
-			if (carryFromAdd)
-			{
-				setResultToInfinity();
-				return true;
-			}
-		}
-		std::cout << "+ inf\n";
-		break;
-
-	case TOWARD_ZERO:
-		break;
-	default:
-		std::cout << "Cos jest nie tak" << std::endl;
-		break;
-	}
-
-
-	std::cout<<"in round: " << type << std::endl;
-}
-
 void FloatNumber::round(roundType type)
 {
 	bitS = (bitR || bitS);
@@ -1153,7 +1073,7 @@ void FloatNumber::round(roundType type)
 	switch (type)
 	{
 
-	case TOWARD_ZERO:	//do zera
+	case TOWARD_ZERO:
 		return;
 	case TOWARD_PLUS_INF:
 		if ((bitR == 1 || bitS == 1)&&this->sign==false)
@@ -1168,7 +1088,7 @@ void FloatNumber::round(roundType type)
 		}
 		return;
 
-	case TO_NEAREST_TIES_TO_EVEN:	//sym do wiekszej bezw
+	case TO_NEAREST_TIES_TO_EVEN:
 
 		if (bitR == true && bitS == true)
 		{
@@ -1186,15 +1106,12 @@ void FloatNumber::round(roundType type)
 		{
 			incSevBytes(this->floatNumberBits);
 		}
-		
 		else if (bitR == true && bitS == false && ((this->floatNumberBits.back())%2)==1)
 		{
 			incSevBytes(this->floatNumberBits);
-
 		}
 		return;
 	}
-
 }
 
 void FloatNumber::getGRS(std::vector<uint8_t> bytes)
@@ -1266,9 +1183,6 @@ void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident
 		return;
 	}
 
-
-
-	
 	//wykladniki
 	std::vector<uint8_t> exponentDivident;	//wykladnik dzielnej
 	std::vector<uint8_t> exponentDivisor;	//wykladnik dzielnika
@@ -1313,7 +1227,6 @@ void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident
 		setResultToInfinity();
 		return;
 	}
-
 	exponentQuotient.erase(exponentQuotient.begin());
 	ifInfinity = true;
 
@@ -1325,26 +1238,22 @@ void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident
 			break;
 		}
 	}
-
 	if (ifInfinity)
 	{
 		setResultToInfinity();
 		return;
 	}
-
 	//ta czesc kodu wykona sie kiedy liczba przed ewentualna normalizacja nie bedzie nieskonczonoscia i nie bedzie zdenormalizowana 
 	//mnozniki
 	std::vector<uint8_t> fracDivident;		//mnoznik dzielnej
 	std::vector<uint8_t> fracDivisor;		//mnoznik dzielnika 
 	std::vector<uint8_t> fracQuotient(s.getFraction() + 1);
 
-
 	for (int i = s.getExponent(); i < (s.getExponent() + s.getFraction()); i++)
 	{
 		fracDivident.push_back(divident.floatNumberBits[i]);
 		fracDivisor.push_back(divisor.floatNumberBits[i]);
 	}
-
 	fracDivisor.insert(fracDivisor.begin(), 1);		//bajt z bitem ukrytym
 	fracDivident.insert(fracDivident.begin(), 1);
 
@@ -1368,7 +1277,6 @@ void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident
 	{
 		incSevBytes(fracQuotient);
 	}
-
 	bool ifZero;
 
 	while (fracQuotient[0] == 0)
@@ -1388,7 +1296,6 @@ void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident
 		carryFromRot = 0;
 		rrcSevBytes(fracDivisor, carryFromRot);		//skalowanie
 
-
 		if (fracDivident[0] == 255)
 		{
 			carry = 0;
@@ -1404,8 +1311,6 @@ void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident
 			{
 				fracDivident[j] = subbTwoBytes(fracDivident[j], fracDivisor[j], carry); //odejmowanie
 			}
-
-
 		}
 		if (fracDivident[0] != 255)
 		{
@@ -1413,7 +1318,6 @@ void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident
 		}
 
 	}
-
 	//bity GR
 	for (int i = 0; i < 2; i++)
 	{
@@ -1463,15 +1367,11 @@ void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident
 	}
 	fracQuotient.erase(fracQuotient.begin());
 
-
-	
-
 	for (auto i : exponentQuotient)
 		this->floatNumberBits.push_back(i);
 
 	for (auto i : fracQuotient)
 		this->floatNumberBits.push_back(i);
-
 }
 
 FloatNumber::~FloatNumber()

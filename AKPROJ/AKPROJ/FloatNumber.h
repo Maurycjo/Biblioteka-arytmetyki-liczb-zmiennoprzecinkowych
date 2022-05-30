@@ -7,9 +7,10 @@
 class FloatNumber
 {
 private:
-	Standard s;
-	roundType type = TOWARD_ZERO;
-	bool sign;
+	Standard s;																	//standard, przechowuje ile bajtow ma wykladnik i mnoznik
+	roundType type = TOWARD_ZERO;												//schemat zaokraglania, domyslny przez obciecie
+	bool sign;																	//znak liczby
+	bool bitG = 0, bitR = 0, bitS = 0;											//bity GRS
 	std::vector<uint8_t> floatNumberBits;										//vector liczby w standardzie
 	void setResultToInfinity();													//ustawienie liczby w standardzie na nieskonczonosc
 	void setResultToZero();														//ustawienie liczby w standardzie na 0
@@ -27,23 +28,21 @@ private:
 	void incSevBytes(std::vector<uint8_t>& number);								//inkrementacja bez przeniesienia vektora bajtow
 	void decSevBytes(std::vector<uint8_t>& number);								//dekrementacja bez przeniesienia vektora bajtow
 	std::vector<uint8_t> generateBias();										//generowanie obciazenia wykladnika
-	void getGRS(std::vector<uint8_t> bytes);
+	void getGRS(std::vector<uint8_t> bytes);									//metoda ustawiajaca bity grs
 	void prepGRS(std::vector<uint8_t>& bytes);									//Przygotowuje bity GRS do obliczen
 public:
-	bool bitG = 0, bitR = 0, bitS = 0;
-	bool round_alpha(std::vector<uint8_t>& bytes, roundType type);
-	void round(roundType type);
+	void round(roundType type);													//zaokraglenia
 	void setStandard(Standard s);												//ustawienie standardu
 	void dec2float(double inputNumber);											//konwersja na liczbe FloatNumber
 	void string2float(std::string inputNumber);										//konwersja ciagu bitow na liczbe w standardzie
 	void displayNumberBinary();													//wyswietlenie liczby w formacie binarnym	
 	void multiply(FloatNumber number1, FloatNumber number2);					//mnozenie liczb w standardzie
 	void division(FloatNumber number1, FloatNumber number2);					//dzielenie liczb w standardzie
-	~FloatNumber();
+	~FloatNumber();																//zwalnianie FloatNumberBits
 	void addition(FloatNumber number1, FloatNumber number2);					//dodawanie liczb w standardzie
 	void signNegation();														//negacja znaku liczby
-	void setRoundType(roundType type);
-	roundType getRoundType();
+	void setRoundType(roundType type);											//ustawienie trybu zaokraglenia
+	roundType getRoundType();													//zwrocenie tryby zaokraglenia
 	
 };
 
