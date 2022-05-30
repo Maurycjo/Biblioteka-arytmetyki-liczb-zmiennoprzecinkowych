@@ -40,6 +40,8 @@ public:
 	void division(FloatNumber number1, FloatNumber number2);					//dzielenie liczb w standardzie
 	~FloatNumber();
 	void addition(FloatNumber number1, FloatNumber number2);				//dodawanie liczb w standardzie
+	std::vector<uint8_t> get_bits_for_testing();			//do testow
+	bool get_sign();
 	
 	
 };
