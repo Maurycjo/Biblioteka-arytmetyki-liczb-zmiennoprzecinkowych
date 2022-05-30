@@ -662,7 +662,6 @@ void FloatNumber::multiply(FloatNumber numberA, FloatNumber numberB)
 
 	if (exponentResult[0] > 0)
 	{
-		std::cout << "infinity\n";
 		setResultToInfinity();
 		return;
 	}

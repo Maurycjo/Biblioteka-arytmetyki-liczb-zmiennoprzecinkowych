@@ -9,6 +9,9 @@
 
 int main()
 {
+
+	ConsoleApp consoleapp;
+
 	/*
 	TOWARD_ZERO=1,					//zaokraglenie przez obciecie, do zera
 	TOWARD_PLUS_INF,				//zaokraglenie do plus nieskonczonosci
@@ -16,9 +19,8 @@ int main()
 	TO_NEAREST_TIES_TO_EVEN,		//zaokraglenie symetryczne to wiekszej wartosci bezzwzglednej
 	TO_NEAREST_TIES_AWAY_FROM_ZERO	//zaokraglenie do parzystej
 
-	*/
 	roundType type= TOWARD_PLUS_INF;
-	std::string konwert = "0|01100011|11111111|10";
+	std::string konwert = "0|11111110|11111111|10";
 	FloatNumber number;
 	Standard s(1, 1);
 	number.setStandard(s);
@@ -26,6 +28,7 @@ int main()
 	number.displayNumberBinary();
 	number.round(type);
 	number.displayNumberBinary();
+	*/
 
 
 

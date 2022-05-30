@@ -145,6 +145,7 @@ void::ConsoleApp::addNumbers(roundType type, FloatNumber numberA, FloatNumber nu
 	displayCurrentRoundType(type);
 	enterNumbers(type, numberA, numberB);
 	result.addition(numberA, numberB);	//to bedzie dodawanie nie mnozenie
+	result.round(type);
 	std::cout << "Suma:     ";
 	result.displayNumberBinary();
 }
@@ -155,7 +156,8 @@ void::ConsoleApp::subbNumbers(roundType type, FloatNumber numberA, FloatNumber n
 	displayCurrentRoundType(type);
 	enterNumbers(type, numberA, numberB);
 	numberB.signNegation();
-	result.addition(numberA, numberB);	//to bedzie odejmowanie nie mnozenie
+	result.addition(numberA, numberB);
+	result.round(type);
 	std::cout << "Roznica:  ";
 	result.displayNumberBinary();
 }
@@ -166,6 +168,7 @@ void::ConsoleApp::mulNumbers(roundType type, FloatNumber numberA, FloatNumber nu
 	displayCurrentRoundType(type);
 	enterNumbers(type, numberA, numberB);
 	result.multiply(numberA, numberB);
+	result.round(type);
 	std::cout << "Iloczyn:  ";
 	result.displayNumberBinary();
 }
@@ -176,6 +179,7 @@ void::ConsoleApp::divNumbers(roundType type, FloatNumber numberA, FloatNumber nu
 	displayCurrentRoundType(type);
 	enterNumbers(type, numberA, numberB);
 	result.division(numberA, numberB);
+	result.round(type);
 	std::cout << "Iloraz:   ";
 	result.displayNumberBinary();
 }
@@ -200,12 +204,10 @@ void::ConsoleApp::enterNumbers(roundType type, FloatNumber& numberA, FloatNumber
 	else
 	{
 		std::cout << "w zmiennym przecinku" << std::endl;
-		std::cin >> A;
-		std::cin >> B;
+		std::cin >> strA;
+		std::cin >> strB;
 		numberA.string2float(strA);
 		numberB.string2float(strB);
-	
-			
 	}
 
 	std::cout << "Przekonwertowano" << std::endl;
