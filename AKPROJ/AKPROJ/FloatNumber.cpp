@@ -1037,36 +1037,32 @@ void FloatNumber::addition(FloatNumber numberA, FloatNumber numberB)
 		}
 	}
 
-	if (numberA.sign == numberB.sign)
-	{ // obie liczby sa dodatnie
-		// numberA.getGRS(fracA);
-		// numberB.getGRS(fracB); // Tutaj bity maja byc juz przypisane do liczby!!!
-
-		// std::cout << "Ostatni bajt: " << int(fracB[s.getFraction()]) << std::endl;
-
-		// std::cout << "A GRS: " << numberA.Gbit << numberA.Rbit << numberA.Sbit << std::endl;
-		// std::cout << "B GRS: " << numberB.Gbit << numberB.Rbit << numberB.Sbit << std::endl;
-		// std::cout << "Ostatni bajt: " << int(fracA[s.getFraction()]) << std::endl;
-		if (numberA.sign)
-		{ // dodatnia i dodatnia daje dodatnia, ujemna i ujemna ujemna. Default dodatnia!
-			sign = 1;
-		}
+	if (numberA.sign == numberB.sign) // liczby maja takie same znaki, nie musimy zamieniac na u2
+	{
 		for (int i = (s.getFraction()); i >= 0; i--)
 		{
-			fractResult[i] = addTwoBytes(fracA[i], fracB[i], carryFromAdd);
-			std::cout << "DODAJE: " << int(fracA[i]) << " " << int(fracB[i]) << std::endl;
+			fractResult[i] = addTwoBytes(fracA[i], fracB[i], carryFromAdd);	//dodawanie bajtow od najmniej znaczacego
 		}
-
-		if (exponentA == exponentB)
+		/*
+		jesli wykladniki sa takie same to znaczy ze zawsze bedzie trzeba skalowac mnoznik,
+		bo obie liczby posiadaja bit ukryty rowny 1
+		*/
+		if (exponentA == exponentB)  
 		{
 			incSevBytes(exponentResult);
 			carryFromRr = 0;
 			rrcSevBytes(fractResult, carryFromRr);
-			if (carryFromAdd)
+			if (carryFromAdd) // jesli dodatkowo nastapilo przeniesienie z mnoznika to 1 bit po przeksalowaniu bedzie rowny 1
 			{
 				fractResult[0] = fractResult[0] | 0b10000000;
 			}
 		}
+		/*
+		Jesli ktorys z wykladnikow byl wiekszy, to znaczy ze trzeba bylo skalowac.
+		Bit ukryty ednej liczby bedzie wtedy rowny 0. 
+		Jesli z mnoznika nie wystapil nadmiar, to liczby nie trzeba skalowac.
+		W przeciwnym wypadku nalezy przeskalowac o jedno miejsce.
+		*/
 		else if (carryFromAdd)
 		{
 			carryFromRr = 0;
@@ -1074,28 +1070,26 @@ void FloatNumber::addition(FloatNumber numberA, FloatNumber numberB)
 			incSevBytes(exponentResult);
 		}
 	}
-	else
-	{ // Ujemna i dodatnia
+	else // Liczby maja rozne znaki i sa rozpatrowane w tym warunku
+	{ 
+		// Szukamy liczby wiekszej. Jesli wykladniki byly rowne to sprawdzamy mnozniki
 		if (!greaterA && !greaterB)
-		{ // Takie same wykladniki, sprawdz mnozniki (DOROBIC COS DLA ROWNYCH LICZB) TUTAJ FLAGI GREATERA GREATER B SIE ZMIENIA
-			std::cout << "TUTAJ3" << std::endl;
+		{ 
 			for (int i = 0; i < s.getFraction(); i++)
 			{
-				std::cout << "TUTAJ0: " << int(fracA[i]) << " " << int(fracB[i]) << std::endl;
+				// po znalezieniu wiekszego mnoznika, ustawiamy flagi wiekszej liczby
 				if (int(fracA[i]) > int(fracB[i]))
 				{
-					std::cout << "TUTAJ2" << std::endl;
 					greaterA = true;
 					break;
 				}
 				else if (fracA[i] < fracB[i])
 				{
-					std::cout << "TUTAJ4" << std::endl;
 					greaterB = true;
 					break;
 				}
 			}
-			if (!greaterA && !greaterB)
+			if (!greaterA && !greaterB) // Jesli liczby byly takie same to ustawiamy 0
 			{
 				for (auto i : exponentResult)
 				{
@@ -1110,15 +1104,14 @@ void FloatNumber::addition(FloatNumber numberA, FloatNumber numberB)
 			}
 		}
 
-		// Jeden wykladnik jest wiekszy
-		if (greaterA) // Zamien mniejsza liczbe na u2
+		
+		if (greaterA) // Konwersja mniejszej liczby co do wartosci bezwzglednej na system u2
 		{
 			for (int i = 0; i < fracB.size(); i++)
 			{
 				fracB[i] = ~fracB[i];
 			}
 			incSevBytes(fracB);
-			std::cout << "TUTAJ1" << std::endl;
 			sign = numberA.sign;
 		}
 		else
@@ -1128,23 +1121,23 @@ void FloatNumber::addition(FloatNumber numberA, FloatNumber numberB)
 				fracA[i] = ~fracA[i];
 			}
 			incSevBytes(fracA);
-			std::cout << "SIZE: " << fracA.size() << std::endl;
-			for (int i = 0; i < fracA.size(); i++)
-			{
-				std::cout << "SRAWDZENIE: " << std::bitset<8>(fracA[i]) << std::endl;
-			}
 			sign = numberB.sign;
 		}
 		carryFromAdd = 0;
 		for (int i = (s.getFraction()); i >= 0; i--)
 		{
 			fractResult[i] = addTwoBytes(fracA[i], fracB[i], carryFromAdd);
-			std::cout << "DODAJE: " << int(fracA[i]) << " " << int(fracB[i]) << std::endl;
 		}
 
+		/*
+		scaled -> Ktoras z liczb miala wiekszy wykladnik i mniejsza trzeba bylo skalowac
+		carryFromAdd-> przeniesienie w dodawaniu mnoznikow
+		!scaled && carryFromAdd -> (1)0.xxxx + (0)1.xxxx + carry = (0)0.xxxx TRZEBA SKALOWAC W LEWO
+		scaled && !carryFromAdd -> (1)1.xxxx + (0)1.xxxx = (0)0.xxxx TRZEBA SKALOWAC W LEWO
+
+		*/
 		if ((!scaled && carryFromAdd) || (scaled && !carryFromAdd))
 		{ // skalowanie w lewo do momentu 1.xxxx
-			std::cout << "TEST SKALOWANIA";
 			fractResult.insert(fractResult.begin(), 0);
 			while (fractResult[0] != 1)
 			{
@@ -1155,20 +1148,7 @@ void FloatNumber::addition(FloatNumber numberA, FloatNumber numberB)
 			fractResult.erase(fractResult.begin());
 		}
 	}
-	/*
-	1. Sprawdz znaki i wybierz tryb
-	2. Przeskaluj wykładnik
-		a) Znajdz mniejszy wykladnik
-		b) Zmien go na rowny wiekszemu - przesun mnoznik w lewo
-	3.
-	*/
 
-	std::cout << "WYNIK: ";
-	for (int i = 0; i < s.getFraction() + 1; i++)
-	{
-		std::cout << std::bitset<8>(fractResult[i]) << " ";
-	}
-	std::cout << std::endl;
 
 	getGRS(fractResult);
 	fractResult.pop_back();
@@ -1177,10 +1157,9 @@ void FloatNumber::addition(FloatNumber numberA, FloatNumber numberB)
 	{
 
 		this->floatNumberBits.push_back(i);
-	} // Tutaj dac wykladnik
+	} 
 	for (auto i : fractResult)
 	{
-		std::cout << "TESTMILION: " << std::bitset<8>(i) << std::endl;
 		this->floatNumberBits.push_back(i);
 	}
 	this->sign = sign;
