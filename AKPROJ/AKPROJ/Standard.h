@@ -11,6 +11,15 @@ public:
 		fraction = frac;
 	}
 
+	void setExponent(int exp)
+	{
+		exponent = exp;
+	}
+	void setFraction(int frac)
+	{
+		fraction = frac;
+	}
+
 	Standard()
 	{
 	
@@ -32,6 +41,7 @@ public:
 		return fraction;
 	}
 	
+
 	
 
 	private:

@@ -45,6 +45,7 @@ public:
 	roundType getRoundType();													//zwrocenie tryby zaokraglenia;
 	std::vector<uint8_t> get_bits_for_testing();								//do testow
 	bool get_sign();
+	void setRandomNumber();
 	
 	
 };

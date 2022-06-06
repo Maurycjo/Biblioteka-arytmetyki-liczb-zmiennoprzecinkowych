@@ -143,10 +143,13 @@
     <ClCompile Include="ConsoleApp.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="FloatNumber.cpp" />
+    <ClCompile Include="TimeKeeping.cpp" />
+    <ClCompile Include="TimeKeeping.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConsoleApp.h" />
     <ClInclude Include="FloatNumber.h" />
+    <ClInclude Include="RandomGenerator.h" />
     <ClInclude Include="Standard.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

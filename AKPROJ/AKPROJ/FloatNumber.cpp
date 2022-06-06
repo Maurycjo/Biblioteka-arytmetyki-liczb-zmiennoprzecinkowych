@@ -130,7 +130,6 @@ void FloatNumber::dec2float(double inputNumber)
 
 
 	uint8_t grsBits = fracTab[fracTab.size() - 1];
-	std::cout<< int(grsBits)<<std::endl;
 
 	if ((0b10000000 & grsBits) == 0b10000000){
 		
@@ -1196,7 +1195,7 @@ void FloatNumber::division(FloatNumber divident, FloatNumber divisor)	//divident
 	}
 	//wytworzenie bitu ukrytego
 	carry = 0;
-	for (int i = (s.getExponent()) * 2; i >= 0; i--)
+	for (int i = (s.getFraction()) * 2; i >= 0; i--)
 	{
 		fracDivident[i] = subbTwoBytes(fracDivident[i], fracDivisor[i], carry);
 	}
@@ -1352,7 +1351,6 @@ void FloatNumber::getGRS(std::vector<uint8_t> bytes)
 			break;
 		}
 	}
-	std::cout << "NOWE GRS: " << bitG << bitR << bitS << std::endl;
 }
 
 void FloatNumber::prepGRS(std::vector<uint8_t>& bytes)
@@ -1378,4 +1376,13 @@ std::vector<uint8_t> FloatNumber::get_bits_for_testing()
 bool FloatNumber::get_sign()
 {
 	return sign;
+}
+
+void FloatNumber::setRandomNumber()
+{
+
+
+
+
+
 }
